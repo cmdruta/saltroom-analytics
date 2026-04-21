@@ -1,0 +1,39 @@
+{
+  "bronze_schema": "bronze",
+  "datasets": {
+    "clients": {
+      "load_type": "single_csv",
+      "target_table": "clients",
+      "path": "/wellnessliving/clients/wl_clients_full_20260420_v1.csv"
+    },
+    "visits": {
+      "load_type": "merged_csv",
+      "target_table": "visits",
+      "left_source": {
+        "name": "attendancewithpurchaseoption",
+        "path": "/wellnessliving/visits/wl_attendancewithPurchaseOption_full_20260420_v1.csv"
+      },
+      "right_source": {
+        "name": "bookingsbysource",
+        "path": "/wellnessliving/visits/wl_bookingsBySource_full_20260420_v1.csv"
+      },
+      "merge_keys": [
+        "client",
+        "service",
+        "date",
+        "time"
+      ]
+    },
+    "timeclock": {
+      "load_type": "single_csv",
+      "target_table": "timeclock",
+      "path": "/wellnessliving/timeclock/wl_timeclock_full_20260420_v1.csv"
+    },
+    "purchases": {
+      "load_type": "multi_csv_union",
+      "target_table": "purchases",
+      "path_glob": "/wellnessliving/purchases/*.csv",
+      "file_name_contains": "AllSales"
+    }
+  }
+}
