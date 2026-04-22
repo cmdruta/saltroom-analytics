@@ -11,17 +11,6 @@
 
 # CELL ********************
 
-# Placeholder
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# COMMAND ----------
 # Bronze ingestion framework for Microsoft Fabric Lakehouse.
 # This notebook reads WellnessLiving CSV exports from Lakehouse Files and lands
 # them into Delta tables in the bronze schema with minimal standardization.
@@ -39,7 +28,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 
-# COMMAND ----------
+# CELL ********************
 # Runtime parameters
 
 BRONZE_CONFIG_PATH = "../../config/bronze_sources.json"
@@ -56,7 +45,7 @@ CSV_READ_OPTIONS = {
 VALID_LOAD_MODES = {"init", "full_refresh", "append"}
 
 
-# COMMAND ----------
+# CELL ********************
 # Helper functions
 
 def resolve_config_path(config_path: str) -> Path:
@@ -211,7 +200,7 @@ def get_matching_source_files(dataframe: DataFrame, file_name_filter: str | None
     return sorted(matching_files)
 
 
-# COMMAND ----------
+# CELL ********************
 # Dataset loaders
 
 def load_single_csv_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
@@ -327,7 +316,7 @@ def run_bronze_ingestion(config: dict, load_mode: str) -> None:
     load_purchases_dataset(datasets["purchases"], bronze_schema, load_mode)
 
 
-# COMMAND ----------
+# CELL ********************
 # Main execution
 
 active_load_mode = validate_load_mode(LOAD_MODE)
@@ -336,3 +325,11 @@ config = load_config(BRONZE_CONFIG_PATH)
 run_bronze_ingestion(config, active_load_mode)
 
 print(f"Bronze ingestion completed successfully using LOAD_MODE='{active_load_mode}'.")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
