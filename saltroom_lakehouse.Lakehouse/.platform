@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Lakehouse",
+    "displayName": "saltroom_lakehouse"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "52b6b409-b21e-b5c6-475e-fe1f1ab73109"
+  }
+}
