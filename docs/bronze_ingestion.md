@@ -1,28 +1,29 @@
 # Bronze Ingestion Framework
 
-This project includes an initial Bronze ingestion framework for a Microsoft Fabric Lakehouse using schema-based medallion layers (`bronze`, `silver`, `gold`).
+This project contains an initial Bronze ingestion framework for a Microsoft Fabric Lakehouse using schema-based medallion layers: `bronze`, `silver`, and `gold`.
 
 ## Files
 
 - `config/bronze_sources.json`
-  - Maps WellnessLiving source file locations to Bronze target tables.
 - `notebooks/bronze/bronze_ingestion.py`
-  - PySpark notebook-style script for loading Bronze tables.
 
 ## What The Notebook Does
 
-The Bronze notebook:
+The notebook ingests WellnessLiving CSV exports from Lakehouse Files into Delta tables in the `bronze` schema.
 
-- reads WellnessLiving CSV exports from Lakehouse Files
+It only applies minimal Bronze-standard handling:
+
+- reads raw CSV files
 - normalizes column names to snake_case
 - adds audit metadata columns
 - writes Delta tables to the `bronze` schema
-- supports both first-time table creation and later append-based loads
 
 Audit columns added to every Bronze table:
 
 - `ingestion_timestamp`
 - `source_file_name`
+
+The notebook does not apply business transformations, deduplication, conforming, or downstream modeling.
 
 ## Source Inputs
 
@@ -36,40 +37,79 @@ Expected source files in Lakehouse Files:
 
 ## Bronze Outputs
 
-The notebook writes these Delta tables:
+The notebook writes:
 
 - `bronze.clients`
 - `bronze.visits`
 - `bronze.timeclock`
 - `bronze.purchases`
 
-Behavior by dataset:
+Dataset behavior:
 
-- `clients` and `timeclock` are loaded from one source CSV each.
-- `purchases` loads all matching yearly `AllSales` CSV files into one `bronze.purchases` table if the normalized schemas match.
-- `visits` merges the two visit exports on `client`, `service`, `date`, and `time`.
+- `clients` and `timeclock` each load from one CSV file
+- `visits` merges the two visit files on `client`, `service`, `date`, and `time`
+- `purchases` loads all matching yearly `AllSales` CSV files into one table after checking that their normalized schemas match
+
+## Load Modes
+
+Set the `LOAD_MODE` variable near the top of `notebooks/bronze/bronze_ingestion.py`.
+
+Supported values:
+
+- `init`
+  - creates each Bronze table only if it does not already exist
+  - fails if the target table already exists
+  - use this for first-time setup
+- `full_refresh`
+  - overwrites each target Bronze table
+  - use this when you want to rebuild Bronze from the current source files
+- `append`
+  - appends to existing Bronze tables
+  - creates missing tables automatically
+  - use this for recurring loads
 
 ## How To Run In Fabric
 
 1. Upload or sync this repository into your Fabric workspace.
 2. Attach the notebook to the target Lakehouse.
-3. Confirm the source CSV files are present in Lakehouse Files at the configured paths.
-4. Open `notebooks/bronze/bronze_ingestion.py` as a Fabric notebook or copy the code into a Fabric PySpark notebook.
-5. Run the notebook.
+3. Confirm the source files exist in Lakehouse Files at the configured paths.
+4. Open `notebooks/bronze/bronze_ingestion.py` in a Fabric PySpark notebook.
+5. Set `LOAD_MODE` to one of:
+   - `init`
+   - `full_refresh`
+   - `append`
+6. Run the notebook.
 
-## Initial Vs Recurring Loads
+## Practical Run Guidance
 
-- Initial load:
-  - if the Bronze table does not exist yet, the notebook creates it in the `bronze` schema.
-- Recurring load:
-  - if the Bronze table already exists, the notebook appends the newly ingested rows.
+Recommended first run:
 
-This framework intentionally keeps Bronze logic minimal. It does not apply business rules, deduplication, or conformed modeling.
+1. Set `LOAD_MODE = "init"`.
+2. Run the notebook once to create the Bronze tables.
 
-## Practical Notes
+Recommended recurring run:
 
-- The notebook expects a Fabric Spark session named `spark`.
-- The config path is set relative to the notebook source file:
-  - `../../config/bronze_sources.json`
-- If you move the notebook or config file, update `BRONZE_CONFIG_PATH` in the notebook.
-- If purchase file schemas differ after column normalization, the notebook fails fast so the mismatch can be resolved explicitly.
+1. Set `LOAD_MODE = "append"`.
+2. Run the notebook to add newly ingested raw rows.
+
+Recommended rebuild run:
+
+1. Set `LOAD_MODE = "full_refresh"`.
+2. Run the notebook to replace Bronze table contents from the current source files.
+
+## Troubleshooting
+
+- Missing source files
+  - verify the WellnessLiving exports are present in Lakehouse Files at the configured paths
+- Purchase schema mismatch
+  - the notebook fails if yearly purchase files do not share the same schema after column normalization
+- Visits merge key mismatch
+  - confirm both visit files contain columns that normalize to `client`, `service`, `date`, and `time`
+- Config path issue
+  - if you move the notebook or config file, update `BRONZE_CONFIG_PATH` in the notebook
+
+## Notes
+
+- The notebook expects an active Fabric Spark session named `spark`.
+- The notebook creates the `bronze` schema if it does not already exist.
+- The purchases loader processes matching files in sorted file-name order for consistent multi-file ingestion behavior.

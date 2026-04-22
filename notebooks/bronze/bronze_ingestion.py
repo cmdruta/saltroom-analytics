@@ -19,9 +19,11 @@ from pyspark.sql import functions as F
 
 
 # COMMAND ----------
-# Configuration
+# Runtime parameters
 
 BRONZE_CONFIG_PATH = "../../config/bronze_sources.json"
+LOAD_MODE = "append"  # Supported values: init, full_refresh, append
+
 CSV_READ_OPTIONS = {
     "header": "true",
     "multiLine": "true",
@@ -29,6 +31,8 @@ CSV_READ_OPTIONS = {
     "quote": '"',
     "encoding": "UTF-8",
 }
+
+VALID_LOAD_MODES = {"init", "full_refresh", "append"}
 
 
 # COMMAND ----------
@@ -55,6 +59,14 @@ def load_config(config_path: str) -> dict:
     resolved_path = resolve_config_path(config_path)
     with resolved_path.open("r", encoding="utf-8") as file_handle:
         return json.load(file_handle)
+
+
+def validate_load_mode(load_mode: str) -> str:
+    if load_mode not in VALID_LOAD_MODES:
+        raise ValueError(
+            f"Unsupported LOAD_MODE '{load_mode}'. Expected one of: {sorted(VALID_LOAD_MODES)}"
+        )
+    return load_mode
 
 
 def read_csv(path: str, **overrides: str) -> DataFrame:
@@ -118,14 +130,26 @@ def table_exists(table_name: str) -> bool:
     return spark.catalog.tableExists(table_name)
 
 
-def write_delta_table(dataframe: DataFrame, target_table: str) -> None:
-    """Create the table on first load, otherwise append on recurring loads."""
-    writer = dataframe.write.format("delta").mode("append")
+def write_delta_table(dataframe: DataFrame, target_table: str, load_mode: str) -> None:
+    """Write a Bronze table using the requested load mode."""
+    table_already_exists = table_exists(target_table)
 
-    if not table_exists(target_table):
-        writer.option("overwriteSchema", "true")
+    if load_mode == "init":
+        if table_already_exists:
+            raise ValueError(
+                f"Target table {target_table} already exists. Use LOAD_MODE='full_refresh' or 'append'."
+            )
+        dataframe.write.format("delta").mode("errorifexists").saveAsTable(target_table)
+        return
 
-    writer.saveAsTable(target_table)
+    if load_mode == "full_refresh":
+        dataframe.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(target_table)
+        return
+
+    if table_already_exists:
+        dataframe.write.format("delta").mode("append").saveAsTable(target_table)
+    else:
+        dataframe.write.format("delta").mode("errorifexists").saveAsTable(target_table)
 
 
 def align_to_reference_schema(dataframe: DataFrame, reference_columns: list[str]) -> DataFrame:
@@ -155,35 +179,43 @@ def ensure_bronze_schema_exists(bronze_schema: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {bronze_schema}")
 
 
+def get_matching_source_files(dataframe: DataFrame, file_name_filter: str | None = None) -> list[str]:
+    if file_name_filter:
+        dataframe = dataframe.filter(F.col("_source_file_name").contains(file_name_filter))
+
+    matching_files = [
+        row["_source_file_name"]
+        for row in dataframe.select("_source_file_name").distinct().collect()
+    ]
+    return sorted(matching_files)
+
+
 # COMMAND ----------
 # Dataset loaders
 
-def load_single_csv_dataset(dataset_config: dict, bronze_schema: str) -> None:
+def load_single_csv_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
     dataframe = read_csv_with_metadata(dataset_config["path"])
     dataframe = normalize_column_names(dataframe)
     dataframe = add_audit_columns(dataframe)
 
     target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
-    write_delta_table(dataframe, target_table)
+    write_delta_table(dataframe, target_table, load_mode)
 
 
-def load_purchases_dataset(dataset_config: dict, bronze_schema: str) -> None:
+def load_purchases_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
     file_pattern = dataset_config["path_glob"]
     file_name_filter = dataset_config.get("file_name_contains")
 
     raw_dataframe = read_csv_with_metadata(file_pattern)
+    matching_files = get_matching_source_files(raw_dataframe, file_name_filter)
 
-    if file_name_filter:
-        raw_dataframe = raw_dataframe.filter(F.col("_source_file_name").contains(file_name_filter))
-
-    distinct_files = [row["_source_file_name"] for row in raw_dataframe.select("_source_file_name").distinct().collect()]
-    if not distinct_files:
+    if not matching_files:
         raise ValueError(f"No purchase files matched the configured path: {file_pattern}")
 
     purchase_dataframes = []
     reference_columns = None
 
-    for source_file_name in distinct_files:
+    for source_file_name in matching_files:
         purchase_df = raw_dataframe.filter(F.col("_source_file_name") == source_file_name)
         purchase_df = normalize_column_names(purchase_df)
 
@@ -197,14 +229,14 @@ def load_purchases_dataset(dataset_config: dict, bronze_schema: str) -> None:
 
     final_dataframe = union_dataframes(purchase_dataframes)
     target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
-    write_delta_table(final_dataframe, target_table)
+    write_delta_table(final_dataframe, target_table, load_mode)
 
 
 def build_non_key_columns(dataframe: DataFrame, merge_keys: list[str]) -> list[str]:
     return [column_name for column_name in dataframe.columns if column_name not in merge_keys]
 
 
-def load_visits_dataset(dataset_config: dict, bronze_schema: str) -> None:
+def load_visits_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
     merge_keys = dataset_config["merge_keys"]
     left_config = dataset_config["left_source"]
     right_config = dataset_config["right_source"]
@@ -256,25 +288,30 @@ def load_visits_dataset(dataset_config: dict, bronze_schema: str) -> None:
         f"_source_file_name_{left_config['name']}",
         f"_source_file_name_{right_config['name']}",
     )
-
     visits_df = add_audit_columns(visits_df)
 
     target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
-    write_delta_table(visits_df, target_table)
+    write_delta_table(visits_df, target_table, load_mode)
+
+
+def run_bronze_ingestion(config: dict, load_mode: str) -> None:
+    bronze_schema = config["bronze_schema"]
+    datasets = config["datasets"]
+
+    ensure_bronze_schema_exists(bronze_schema)
+
+    load_single_csv_dataset(datasets["clients"], bronze_schema, load_mode)
+    load_visits_dataset(datasets["visits"], bronze_schema, load_mode)
+    load_single_csv_dataset(datasets["timeclock"], bronze_schema, load_mode)
+    load_purchases_dataset(datasets["purchases"], bronze_schema, load_mode)
 
 
 # COMMAND ----------
 # Main execution
 
+active_load_mode = validate_load_mode(LOAD_MODE)
 config = load_config(BRONZE_CONFIG_PATH)
-bronze_schema = config["bronze_schema"]
-datasets = config["datasets"]
 
-ensure_bronze_schema_exists(bronze_schema)
+run_bronze_ingestion(config, active_load_mode)
 
-load_single_csv_dataset(datasets["clients"], bronze_schema)
-load_visits_dataset(datasets["visits"], bronze_schema)
-load_single_csv_dataset(datasets["timeclock"], bronze_schema)
-load_purchases_dataset(datasets["purchases"], bronze_schema)
-
-print("Bronze ingestion completed successfully.")
+print(f"Bronze ingestion completed successfully using LOAD_MODE='{active_load_mode}'.")
