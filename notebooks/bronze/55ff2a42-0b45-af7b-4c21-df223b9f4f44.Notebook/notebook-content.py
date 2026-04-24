@@ -6,14 +6,23 @@
 # META   "kernel_info": {
 # META     "name": "synapse_pyspark"
 # META   },
-# META   "dependencies": {}
+# META   "dependencies": {
+# META     "lakehouse": {
+# META       "default_lakehouse": "6567cb96-1424-4980-8cfb-dc13a43113cc",
+# META       "default_lakehouse_name": "saltroom_lakehouse",
+# META       "default_lakehouse_workspace_id": "9161a515-b087-41f4-8474-27fcb91ae1c0",
+# META       "known_lakehouses": [
+# META         {
+# META           "id": "6567cb96-1424-4980-8cfb-dc13a43113cc"
+# META         }
+# META       ]
+# META     }
+# META   }
 # META }
 
 # CELL ********************
 
-# Bronze ingestion framework for Microsoft Fabric Lakehouse.
-# This notebook reads WellnessLiving CSV exports from Lakehouse Files and lands
-# them into Delta tables in the bronze schema with minimal standardization.
+# Dependencies
 
 from __future__ import annotations
 
@@ -28,7 +37,15 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
+
 # Runtime parameters
 
 CONFIG_CANDIDATE_PATHS = [
@@ -36,12 +53,12 @@ CONFIG_CANDIDATE_PATHS = [
     "/lakehouse/default/Files/config/bronze_sources.json",
     "../../config/bronze_sources.json",
 ]
-ENTITY_TO_LOAD = "all"  # Supported values: all, clients, visits, timeclock, purchases
+ENTITY_TO_LOAD = "clients"  # Supported values: all, clients, visits, timeclock, purchases
 ENTITY_LOAD_MODES = {
-    "clients": "append",
-    "visits": "append",
-    "timeclock": "append",
-    "purchases": "append",
+    "clients": "init",
+    "visits": "init",
+    "timeclock": "init",
+    "purchases": "init",
 }
 
 CSV_READ_OPTIONS = {
@@ -56,7 +73,15 @@ VALID_LOAD_MODES = {"init", "full_refresh", "append"}
 VALID_ENTITIES = {"clients", "visits", "timeclock", "purchases"}
 
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
+
 # Helper functions
 
 def resolve_local_config_path(config_path: str) -> Path | None:
@@ -292,7 +317,15 @@ def get_matching_source_files(dataframe: DataFrame, file_name_filter: str | None
     return sorted(matching_files)
 
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
+
 # Dataset loaders
 
 def load_single_csv_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
@@ -438,7 +471,15 @@ def run_bronze_ingestion(config: dict, selected_entities: list[str], entity_load
             load_purchases_dataset(datasets["purchases"], bronze_schema, load_mode)
 
 
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
 # CELL ********************
+
 # Main execution
 
 active_entity = validate_entity(ENTITY_TO_LOAD)
@@ -453,7 +494,6 @@ print(
     f"{selected_entities} using load modes "
     f"{ {entity_name: entity_load_modes[entity_name] for entity_name in selected_entities} }."
 )
-
 
 # METADATA ********************
 
