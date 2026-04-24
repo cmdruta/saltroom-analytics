@@ -31,8 +31,18 @@ from pyspark.sql import functions as F
 # CELL ********************
 # Runtime parameters
 
-BRONZE_CONFIG_PATH = "../../config/bronze_sources.json"
-LOAD_MODE = "append"  # Supported values: init, full_refresh, append
+CONFIG_CANDIDATE_PATHS = [
+    "Files/config/bronze_sources.json",
+    "/lakehouse/default/Files/config/bronze_sources.json",
+    "../../config/bronze_sources.json",
+]
+ENTITY_TO_LOAD = "all"  # Supported values: all, clients, visits, timeclock, purchases
+ENTITY_LOAD_MODES = {
+    "clients": "append",
+    "visits": "append",
+    "timeclock": "append",
+    "purchases": "append",
+}
 
 CSV_READ_OPTIONS = {
     "header": "true",
@@ -43,13 +53,14 @@ CSV_READ_OPTIONS = {
 }
 
 VALID_LOAD_MODES = {"init", "full_refresh", "append"}
+VALID_ENTITIES = {"clients", "visits", "timeclock", "purchases"}
 
 
 # CELL ********************
 # Helper functions
 
-def resolve_config_path(config_path: str) -> Path:
-    """Resolve the config file from the notebook location or current working directory."""
+def resolve_local_config_path(config_path: str) -> Path | None:
+    """Resolve a local config path when the notebook is executed from a checked-out repo."""
     candidate_paths = []
 
     if "__file__" in globals():
@@ -62,13 +73,37 @@ def resolve_config_path(config_path: str) -> Path:
         if candidate.exists():
             return candidate
 
-    raise FileNotFoundError(f"Could not find Bronze config file: {config_path}")
+    return None
 
 
-def load_config(config_path: str) -> dict:
-    resolved_path = resolve_config_path(config_path)
-    with resolved_path.open("r", encoding="utf-8") as file_handle:
-        return json.load(file_handle)
+def read_text_from_spark_path(path: str) -> str:
+    lines = spark.read.text(path).collect()
+    return "\n".join(row["value"] for row in lines)
+
+
+def load_config(config_candidate_paths: list[str]) -> dict:
+    """Load config from Lakehouse Files first, then fall back to local repo paths."""
+    load_errors = []
+
+    for candidate_path in config_candidate_paths:
+        if candidate_path.startswith("Files/") or candidate_path.startswith("/lakehouse/"):
+            try:
+                return json.loads(read_text_from_spark_path(candidate_path))
+            except Exception as exc:
+                load_errors.append(f"{candidate_path}: {exc}")
+                continue
+
+        resolved_path = resolve_local_config_path(candidate_path)
+        if resolved_path:
+            with resolved_path.open("r", encoding="utf-8") as file_handle:
+                return json.load(file_handle)
+
+        load_errors.append(f"{candidate_path}: path not found")
+
+    raise FileNotFoundError(
+        "Could not find Bronze config file in Lakehouse Files or local repo paths. "
+        f"Tried: {load_errors}"
+    )
 
 
 def validate_load_mode(load_mode: str) -> str:
@@ -77,6 +112,27 @@ def validate_load_mode(load_mode: str) -> str:
             f"Unsupported LOAD_MODE '{load_mode}'. Expected one of: {sorted(VALID_LOAD_MODES)}"
         )
     return load_mode
+
+
+def validate_entity(entity_to_load: str) -> str:
+    if entity_to_load != "all" and entity_to_load not in VALID_ENTITIES:
+        raise ValueError(
+            f"Unsupported ENTITY_TO_LOAD '{entity_to_load}'. Expected 'all' or one of: {sorted(VALID_ENTITIES)}"
+        )
+    return entity_to_load
+
+
+def resolve_selected_entities(entity_to_load: str) -> list[str]:
+    if entity_to_load == "all":
+        return ["clients", "visits", "timeclock", "purchases"]
+    return [entity_to_load]
+
+
+def resolve_entity_load_modes(entity_load_modes: dict[str, str]) -> dict[str, str]:
+    return {
+        entity_name: validate_load_mode(entity_load_modes.get(entity_name, "append"))
+        for entity_name in sorted(VALID_ENTITIES)
+    }
 
 
 def read_csv(path: str, **overrides: str) -> DataFrame:
@@ -138,6 +194,42 @@ def read_csv_with_metadata(path: str, **overrides: str) -> DataFrame:
 
 def table_exists(table_name: str) -> bool:
     return spark.catalog.tableExists(table_name)
+
+
+def is_dataframe_empty(dataframe: DataFrame) -> bool:
+    return dataframe.limit(1).count() == 0
+
+
+def get_existing_source_file_names(target_table: str) -> set[str]:
+    if not table_exists(target_table):
+        return set()
+
+    target_dataframe = spark.table(target_table)
+    if "source_file_name" not in target_dataframe.columns:
+        return set()
+
+    return {
+        row["source_file_name"]
+        for row in target_dataframe.select("source_file_name").distinct().collect()
+        if row["source_file_name"]
+    }
+
+
+def filter_already_ingested_files(
+    dataframe: DataFrame,
+    target_table: str,
+    load_mode: str,
+    source_file_column: str = "_source_file_name",
+) -> DataFrame:
+    """In append mode, keep only rows whose source files have not been loaded before."""
+    if load_mode != "append" or not table_exists(target_table):
+        return dataframe
+
+    ingested_source_files = sorted(get_existing_source_file_names(target_table))
+    if not ingested_source_files:
+        return dataframe
+
+    return dataframe.filter(~F.col(source_file_column).isin(ingested_source_files))
 
 
 def write_delta_table(dataframe: DataFrame, target_table: str, load_mode: str) -> None:
@@ -204,23 +296,41 @@ def get_matching_source_files(dataframe: DataFrame, file_name_filter: str | None
 # Dataset loaders
 
 def load_single_csv_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
+    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
     dataframe = read_csv_with_metadata(dataset_config["path"])
     dataframe = normalize_column_names(dataframe)
-    dataframe = add_audit_columns(dataframe)
+    dataframe = filter_already_ingested_files(dataframe, target_table, load_mode)
 
-    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
+    if is_dataframe_empty(dataframe):
+        print(f"Skipping {target_table}: no new source files to ingest.")
+        return
+
+    dataframe = add_audit_columns(dataframe)
     write_delta_table(dataframe, target_table, load_mode)
 
 
 def load_purchases_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
     file_pattern = dataset_config["path_glob"]
     file_name_filter = dataset_config.get("file_name_contains")
+    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
 
     raw_dataframe = read_csv_with_metadata(file_pattern)
     matching_files = get_matching_source_files(raw_dataframe, file_name_filter)
 
     if not matching_files:
         raise ValueError(f"No purchase files matched the configured path: {file_pattern}")
+
+    if load_mode == "append" and table_exists(target_table):
+        ingested_source_files = get_existing_source_file_names(target_table)
+        matching_files = [
+            source_file_name
+            for source_file_name in matching_files
+            if source_file_name not in ingested_source_files
+        ]
+
+    if not matching_files:
+        print(f"Skipping {target_table}: no new purchase files to ingest.")
+        return
 
     purchase_dataframes = []
     reference_columns = None
@@ -238,7 +348,6 @@ def load_purchases_dataset(dataset_config: dict, bronze_schema: str, load_mode: 
         purchase_dataframes.append(purchase_df)
 
     final_dataframe = union_dataframes(purchase_dataframes)
-    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
     write_delta_table(final_dataframe, target_table, load_mode)
 
 
@@ -250,6 +359,7 @@ def load_visits_dataset(dataset_config: dict, bronze_schema: str, load_mode: str
     merge_keys = dataset_config["merge_keys"]
     left_config = dataset_config["left_source"]
     right_config = dataset_config["right_source"]
+    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
 
     left_df = normalize_column_names(read_csv_with_metadata(left_config["path"]))
     right_df = normalize_column_names(read_csv_with_metadata(right_config["path"]))
@@ -298,33 +408,51 @@ def load_visits_dataset(dataset_config: dict, bronze_schema: str, load_mode: str
         f"_source_file_name_{left_config['name']}",
         f"_source_file_name_{right_config['name']}",
     )
+    visits_df = filter_already_ingested_files(visits_df, target_table, load_mode)
+
+    if is_dataframe_empty(visits_df):
+        print(f"Skipping {target_table}: no new source files to ingest.")
+        return
+
     visits_df = add_audit_columns(visits_df)
 
-    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
     write_delta_table(visits_df, target_table, load_mode)
 
-
-def run_bronze_ingestion(config: dict, load_mode: str) -> None:
+def run_bronze_ingestion(config: dict, selected_entities: list[str], entity_load_modes: dict[str, str]) -> None:
     bronze_schema = config["bronze_schema"]
     datasets = config["datasets"]
 
     ensure_bronze_schema_exists(bronze_schema)
 
-    load_single_csv_dataset(datasets["clients"], bronze_schema, load_mode)
-    load_visits_dataset(datasets["visits"], bronze_schema, load_mode)
-    load_single_csv_dataset(datasets["timeclock"], bronze_schema, load_mode)
-    load_purchases_dataset(datasets["purchases"], bronze_schema, load_mode)
+    for entity_name in selected_entities:
+        load_mode = entity_load_modes[entity_name]
+        print(f"Loading entity '{entity_name}' using LOAD_MODE='{load_mode}'.")
+
+        if entity_name == "clients":
+            load_single_csv_dataset(datasets["clients"], bronze_schema, load_mode)
+        elif entity_name == "visits":
+            load_visits_dataset(datasets["visits"], bronze_schema, load_mode)
+        elif entity_name == "timeclock":
+            load_single_csv_dataset(datasets["timeclock"], bronze_schema, load_mode)
+        elif entity_name == "purchases":
+            load_purchases_dataset(datasets["purchases"], bronze_schema, load_mode)
 
 
 # CELL ********************
 # Main execution
 
-active_load_mode = validate_load_mode(LOAD_MODE)
-config = load_config(BRONZE_CONFIG_PATH)
+active_entity = validate_entity(ENTITY_TO_LOAD)
+selected_entities = resolve_selected_entities(active_entity)
+entity_load_modes = resolve_entity_load_modes(ENTITY_LOAD_MODES)
+config = load_config(CONFIG_CANDIDATE_PATHS)
 
-run_bronze_ingestion(config, active_load_mode)
+run_bronze_ingestion(config, selected_entities, entity_load_modes)
 
-print(f"Bronze ingestion completed successfully using LOAD_MODE='{active_load_mode}'.")
+print(
+    "Bronze ingestion completed successfully for "
+    f"{selected_entities} using load modes "
+    f"{ {entity_name: entity_load_modes[entity_name] for entity_name in selected_entities} }."
+)
 
 
 # METADATA ********************
