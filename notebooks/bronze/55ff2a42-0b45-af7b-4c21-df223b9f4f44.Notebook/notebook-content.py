@@ -53,7 +53,7 @@ CONFIG_CANDIDATE_PATHS = [
     "/lakehouse/default/Files/config/bronze_sources.json",
     "../../config/bronze_sources.json",
 ]
-ENTITY_TO_LOAD = "timeclock"  # Supported values: all, clients, visits, timeclock, purchases
+ENTITY_TO_LOAD = "visits"  # Supported values: all, clients, visits, timeclock, purchases
 ENTITY_LOAD_MODES = {
     "clients": "init",
     "visits": "init",
@@ -505,6 +505,18 @@ print(
 # CELL ********************
 
 spark.sql("SHOW TABLES IN bronze").show(truncate=False)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+df = spark.read.option("header", True).csv("Files/wellnessliving/purchases")
+display(df)
 
 # METADATA ********************
 
