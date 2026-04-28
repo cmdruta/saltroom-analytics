@@ -54,7 +54,7 @@ CONFIG_CANDIDATE_PATHS = [
     "../../config/bronze_sources.json",
 ]
 
-ENTITY_TO_CHECK = "all"  # Supported values: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
+ENTITY_TO_CHECK = "all"  # Examples: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
 BRONZE_SCHEMA = "bronze"
 
 VALID_ENTITIES = ["clients", "visits", "visits_attendance", "visits_booking_source", "timeclock", "purchases"]
@@ -120,7 +120,12 @@ def load_config(config_candidate_paths: list[str]) -> dict:
     )
 
 
+def normalize_entity_to_check(entity_to_check: str) -> str:
+    return entity_to_check.strip().lower()
+
+
 def validate_entity(entity_to_check: str) -> str:
+    entity_to_check = normalize_entity_to_check(entity_to_check)
     if entity_to_check != "all" and entity_to_check not in VALID_ENTITIES:
         raise ValueError(
             f"Unsupported ENTITY_TO_CHECK '{entity_to_check}'. "
@@ -145,6 +150,12 @@ def build_table_name(bronze_schema: str, entity_name: str) -> str:
     return f"{bronze_schema}.{entity_name}"
 
 
+def normalize_source_file_name(source_file_name: str | None) -> str:
+    if not source_file_name:
+        return ""
+    return re.sub(r"^.*[/\\\\]", "", source_file_name).strip()
+
+
 def discover_source_file_names(path_pattern: str, file_name_contains: str | None = None) -> list[str]:
     try:
         source_df = (
@@ -159,23 +170,36 @@ def discover_source_file_names(path_pattern: str, file_name_contains: str | None
     if file_name_contains:
         source_df = source_df.filter(F.col("source_file_name").contains(file_name_contains))
 
-    return [row["source_file_name"] for row in source_df.distinct().orderBy("source_file_name").collect()]
+    return [
+        normalize_source_file_name(row["source_file_name"])
+        for row in source_df.distinct().orderBy("source_file_name").collect()
+    ]
+
+
+def build_entity_dataset_config_map(config: dict) -> dict[str, dict]:
+    dataset_map = {
+        "clients": config["datasets"]["clients"],
+        "timeclock": config["datasets"]["timeclock"],
+        "purchases": config["datasets"]["purchases"],
+    }
+
+    for source_config in config["datasets"]["visits"]["sources"]:
+        dataset_map[source_config["target_table"]] = source_config
+
+    return dataset_map
 
 
 def get_expected_source_files(config: dict, entity_name: str) -> list[str]:
-    if entity_name in {"clients", "timeclock"}:
-        dataset_config = config["datasets"][entity_name]
-        return [Path(dataset_config["path"]).name]
+    entity_dataset_config_map = build_entity_dataset_config_map(config)
+    dataset_config = entity_dataset_config_map.get(entity_name)
 
-    if entity_name in {"visits_attendance", "visits_booking_source"}:
-        visits_config = config["datasets"]["visits"]
-        for source_config in visits_config["sources"]:
-            if source_config["target_table"] == entity_name:
-                return [Path(source_config["path"]).name]
+    if not dataset_config:
         return []
 
-    if entity_name == "purchases":
-        dataset_config = config["datasets"][entity_name]
+    if "path" in dataset_config:
+        return [normalize_source_file_name(Path(dataset_config["path"]).name)]
+
+    if "path_glob" in dataset_config:
         return discover_source_file_names(
             dataset_config["path_glob"],
             dataset_config.get("file_name_contains"),
@@ -194,7 +218,7 @@ def get_actual_source_files(dataframe: DataFrame) -> list[str]:
         .distinct()
         .orderBy("source_file_name")
     )
-    return [row["source_file_name"] for row in split_files.collect()]
+    return [normalize_source_file_name(row["source_file_name"]) for row in split_files.collect()]
 
 
 def get_date_like_columns(dataframe: DataFrame) -> list[str]:
@@ -487,23 +511,6 @@ summary_df = build_table_summary(results_df)
 
 display(summary_df)
 display(results_df)
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-spark.sql("""
-SELECT source_file_name, COUNT(*) 
-FROM bronze.purchases
-GROUP BY source_file_name
-ORDER BY source_file_name
-""").show()
 
 # METADATA ********************
 
