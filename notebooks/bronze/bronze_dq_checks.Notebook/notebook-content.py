@@ -54,10 +54,10 @@ CONFIG_CANDIDATE_PATHS = [
     "../../config/bronze_sources.json",
 ]
 
-ENTITY_TO_CHECK = "all"  # Examples: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
+ENTITY_TO_CHECK = "visits_attendance"  # Examples: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
 BRONZE_SCHEMA = "bronze"
 
-VALID_ENTITIES = ["clients", "visits", "visits_attendance", "visits_booking_source", "timeclock", "purchases"]
+VALID_ENTITIES = ["clients", "visits", "visits_purchase_option", "visits_booking_source", "timeclock", "purchases"]
 ALL_TABLE_ENTITIES = ["clients", "visits_attendance", "visits_booking_source", "timeclock", "purchases"]
 DATE_LIKE_NAME_TOKENS = ("date", "time", "timestamp")
 LIKELY_KEY_TOKENS = ("id", "key", "client", "service", "visit", "purchase", "invoice", "staff", "employee")
