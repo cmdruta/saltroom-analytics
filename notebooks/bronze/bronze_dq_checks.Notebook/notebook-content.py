@@ -57,8 +57,6 @@ CONFIG_CANDIDATE_PATHS = [
 ENTITY_TO_CHECK = "visits_attendance"  # Examples: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
 BRONZE_SCHEMA = "bronze"
 
-VALID_ENTITIES = ["clients", "visits", "visits_purchase_option", "visits_booking_source", "timeclock", "purchases"]
-ALL_TABLE_ENTITIES = ["clients", "visits_attendance", "visits_booking_source", "timeclock", "purchases"]
 DATE_LIKE_NAME_TOKENS = ("date", "time", "timestamp")
 LIKELY_KEY_TOKENS = ("id", "key", "client", "service", "visit", "purchase", "invoice", "staff", "employee")
 LIKELY_AMOUNT_TOKENS = ("amount", "total", "price", "cost", "paid", "payment", "sale", "revenue")
@@ -124,21 +122,49 @@ def normalize_entity_to_check(entity_to_check: str) -> str:
     return entity_to_check.strip().lower()
 
 
-def validate_entity(entity_to_check: str) -> str:
+def get_all_table_entities(config: dict) -> list[str]:
+    table_entities = []
+
+    for dataset_name, dataset_config in config["datasets"].items():
+        if dataset_config["load_type"] == "multi_table_csv":
+            table_entities.extend(source_config["target_table"] for source_config in dataset_config["sources"])
+        else:
+            table_entities.append(dataset_config["target_table"])
+
+    return table_entities
+
+
+def get_valid_entity_selectors(config: dict) -> list[str]:
+    selectors = set(get_all_table_entities(config))
+    selectors.update(config["datasets"].keys())
+    selectors.add("all")
+    return sorted(selectors)
+
+
+def validate_entity(entity_to_check: str, config: dict) -> str:
     entity_to_check = normalize_entity_to_check(entity_to_check)
-    if entity_to_check != "all" and entity_to_check not in VALID_ENTITIES:
+    valid_selectors = get_valid_entity_selectors(config)
+    if entity_to_check not in valid_selectors:
         raise ValueError(
             f"Unsupported ENTITY_TO_CHECK '{entity_to_check}'. "
-            f"Expected 'all' or one of: {VALID_ENTITIES}"
+            f"Expected one of: {valid_selectors}"
         )
     return entity_to_check
 
 
-def resolve_entities(entity_to_check: str) -> list[str]:
+def resolve_entities(entity_to_check: str, config: dict) -> list[str]:
     if entity_to_check == "all":
-        return ALL_TABLE_ENTITIES
+        return get_all_table_entities(config)
+
+    visits_config = config["datasets"].get("visits", {})
+    visit_target_tables = [
+        source_config["target_table"]
+        for source_config in visits_config.get("sources", [])
+    ]
+
     if entity_to_check == "visits":
-        return ["visits_attendance", "visits_booking_source"]
+        return visit_target_tables
+
     return [entity_to_check]
 
 
@@ -497,9 +523,9 @@ def build_table_summary(results_df: DataFrame) -> DataFrame:
 
 # Main execution
 
-active_entity = validate_entity(ENTITY_TO_CHECK)
-selected_entities = resolve_entities(active_entity)
 config = load_config(CONFIG_CANDIDATE_PATHS)
+active_entity = validate_entity(ENTITY_TO_CHECK, config)
+selected_entities = resolve_entities(active_entity, config)
 
 all_metrics = []
 for entity_name in selected_entities:
