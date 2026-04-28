@@ -6,7 +6,18 @@
 # META   "kernel_info": {
 # META     "name": "synapse_pyspark"
 # META   },
-# META   "dependencies": {}
+# META   "dependencies": {
+# META     "lakehouse": {
+# META       "default_lakehouse": "6567cb96-1424-4980-8cfb-dc13a43113cc",
+# META       "default_lakehouse_name": "saltroom_lakehouse",
+# META       "default_lakehouse_workspace_id": "9161a515-b087-41f4-8474-27fcb91ae1c0",
+# META       "known_lakehouses": [
+# META         {
+# META           "id": "6567cb96-1424-4980-8cfb-dc13a43113cc"
+# META         }
+# META       ]
+# META     }
+# META   }
 # META }
 
 # CELL ********************
@@ -25,6 +36,13 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
@@ -466,6 +484,22 @@ summary_df = build_table_summary(results_df)
 display(summary_df)
 display(results_df)
 
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+spark.sql("""
+SELECT source_file_name, COUNT(*) 
+FROM bronze.purchases
+GROUP BY source_file_name
+ORDER BY source_file_name
+""").show()
 
 # METADATA ********************
 
