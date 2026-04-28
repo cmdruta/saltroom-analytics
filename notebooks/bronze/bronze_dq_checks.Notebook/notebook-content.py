@@ -54,10 +54,11 @@ CONFIG_CANDIDATE_PATHS = [
     "../../config/bronze_sources.json",
 ]
 
-ENTITY_TO_CHECK = "all"  # Supported values: all, clients, visits, timeclock, purchases
+ENTITY_TO_CHECK = "all"  # Supported values: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
 BRONZE_SCHEMA = "bronze"
 
-VALID_ENTITIES = ["clients", "visits", "timeclock", "purchases"]
+VALID_ENTITIES = ["clients", "visits", "visits_attendance", "visits_booking_source", "timeclock", "purchases"]
+ALL_TABLE_ENTITIES = ["clients", "visits_attendance", "visits_booking_source", "timeclock", "purchases"]
 DATE_LIKE_NAME_TOKENS = ("date", "time", "timestamp")
 LIKELY_KEY_TOKENS = ("id", "key", "client", "service", "visit", "purchase", "invoice", "staff", "employee")
 LIKELY_AMOUNT_TOKENS = ("amount", "total", "price", "cost", "paid", "payment", "sale", "revenue")
@@ -130,7 +131,9 @@ def validate_entity(entity_to_check: str) -> str:
 
 def resolve_entities(entity_to_check: str) -> list[str]:
     if entity_to_check == "all":
-        return VALID_ENTITIES
+        return ALL_TABLE_ENTITIES
+    if entity_to_check == "visits":
+        return ["visits_attendance", "visits_booking_source"]
     return [entity_to_check]
 
 
@@ -160,18 +163,19 @@ def discover_source_file_names(path_pattern: str, file_name_contains: str | None
 
 
 def get_expected_source_files(config: dict, entity_name: str) -> list[str]:
-    dataset_config = config["datasets"][entity_name]
-
     if entity_name in {"clients", "timeclock"}:
+        dataset_config = config["datasets"][entity_name]
         return [Path(dataset_config["path"]).name]
 
-    if entity_name == "visits":
-        return [
-            Path(dataset_config["left_source"]["path"]).name,
-            Path(dataset_config["right_source"]["path"]).name,
-        ]
+    if entity_name in {"visits_attendance", "visits_booking_source"}:
+        visits_config = config["datasets"]["visits"]
+        for source_config in visits_config["sources"]:
+            if source_config["target_table"] == entity_name:
+                return [Path(source_config["path"]).name]
+        return []
 
     if entity_name == "purchases":
+        dataset_config = config["datasets"][entity_name]
         return discover_source_file_names(
             dataset_config["path_glob"],
             dataset_config.get("file_name_contains"),
@@ -249,7 +253,7 @@ def get_null_count_metrics(dataframe: DataFrame, entity_name: str) -> list[dict]
 
 
 def get_duplicate_check_columns(entity_name: str, dataframe: DataFrame) -> list[str] | None:
-    if entity_name == "visits":
+    if entity_name in {"visits_attendance", "visits_booking_source"}:
         visit_keys = ["client", "service", "date", "time"]
         if all(column_name in dataframe.columns for column_name in visit_keys):
             return visit_keys

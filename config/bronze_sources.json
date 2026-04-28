@@ -7,21 +7,18 @@
       "path": "/wellnessliving/clients/wl_clients_full_20260420_v1.csv"
     },
     "visits": {
-      "load_type": "merged_csv",
-      "target_table": "visits",
-      "left_source": {
-        "name": "attendancewithpurchaseoption",
-        "path": "/wellnessliving/visits/wl_attendancewithPurchaseOption_full_20260420_v1.csv"
-      },
-      "right_source": {
-        "name": "bookingsbysource",
-        "path": "/wellnessliving/visits/wl_bookingsBySource_full_20260420_v1.csv"
-      },
-      "merge_keys": [
-        "client",
-        "service",
-        "date",
-        "time"
+      "load_type": "multi_table_csv",
+      "sources": [
+        {
+          "name": "attendance",
+          "target_table": "visits_attendance",
+          "path": "/wellnessliving/visits/wl_attendancewithPurchaseOption_full_20260420_v1.csv"
+        },
+        {
+          "name": "booking_source",
+          "target_table": "visits_booking_source",
+          "path": "/wellnessliving/visits/wl_bookingsBySource_full_20260420_v1.csv"
+        }
       ]
     },
     "timeclock": {

@@ -384,72 +384,19 @@ def load_purchases_dataset(dataset_config: dict, bronze_schema: str, load_mode: 
     write_delta_table(final_dataframe, target_table, load_mode)
 
 
-def build_non_key_columns(dataframe: DataFrame, merge_keys: list[str]) -> list[str]:
-    return [column_name for column_name in dataframe.columns if column_name not in merge_keys]
-
-
 def load_visits_dataset(dataset_config: dict, bronze_schema: str, load_mode: str) -> None:
-    merge_keys = dataset_config["merge_keys"]
-    left_config = dataset_config["left_source"]
-    right_config = dataset_config["right_source"]
-    target_table = build_target_table_name(bronze_schema, dataset_config["target_table"])
+    for source_config in dataset_config["sources"]:
+        target_table = build_target_table_name(bronze_schema, source_config["target_table"])
+        dataframe = read_csv_with_metadata(source_config["path"])
+        dataframe = normalize_column_names(dataframe)
+        dataframe = filter_already_ingested_files(dataframe, target_table, load_mode)
 
-    left_df = normalize_column_names(read_csv_with_metadata(left_config["path"]))
-    right_df = normalize_column_names(read_csv_with_metadata(right_config["path"]))
+        if is_dataframe_empty(dataframe):
+            print(f"Skipping {target_table}: no new source files to ingest.")
+            continue
 
-    left_alias = "attendance"
-    right_alias = "booking"
-
-    join_condition = [
-        F.col(f"{left_alias}.{key}") == F.col(f"{right_alias}.{key}")
-        for key in merge_keys
-    ]
-
-    joined_df = left_df.alias(left_alias).join(
-        right_df.alias(right_alias),
-        on=join_condition,
-        how="full_outer",
-    )
-
-    select_expressions = [
-        F.coalesce(F.col(f"{left_alias}.{key}"), F.col(f"{right_alias}.{key}")).alias(key)
-        for key in merge_keys
-    ]
-
-    for column_name in build_non_key_columns(left_df, merge_keys):
-        alias_name = column_name
-        if column_name in right_df.columns:
-            alias_name = f"{column_name}_{left_config['name']}"
-        select_expressions.append(F.col(f"{left_alias}.{column_name}").alias(alias_name))
-
-    for column_name in build_non_key_columns(right_df, merge_keys):
-        alias_name = column_name
-        if column_name in left_df.columns:
-            alias_name = f"{column_name}_{right_config['name']}"
-        select_expressions.append(F.col(f"{right_alias}.{column_name}").alias(alias_name))
-
-    visits_df = joined_df.select(*select_expressions)
-    visits_df = visits_df.withColumn(
-        "_source_file_name",
-        F.concat_ws(
-            ";",
-            F.col(f"_source_file_name_{left_config['name']}"),
-            F.col(f"_source_file_name_{right_config['name']}"),
-        ),
-    )
-    visits_df = visits_df.drop(
-        f"_source_file_name_{left_config['name']}",
-        f"_source_file_name_{right_config['name']}",
-    )
-    visits_df = filter_already_ingested_files(visits_df, target_table, load_mode)
-
-    if is_dataframe_empty(visits_df):
-        print(f"Skipping {target_table}: no new source files to ingest.")
-        return
-
-    visits_df = add_audit_columns(visits_df)
-
-    write_delta_table(visits_df, target_table, load_mode)
+        dataframe = add_audit_columns(dataframe)
+        write_delta_table(dataframe, target_table, load_mode)
 
 def run_bronze_ingestion(config: dict, selected_entities: list[str], entity_load_modes: dict[str, str]) -> None:
     bronze_schema = config["bronze_schema"]
