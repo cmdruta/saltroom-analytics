@@ -4,7 +4,7 @@
     "clients": {
       "load_type": "single_csv",
       "target_table": "clients",
-      "path": "/wellnessliving/clients/wl_clients_full_20260420_v1.csv"
+      "path": "/wellnessliving/clients/wl_clients_full_20260420_v2.csv"
     },
     "visits": {
       "load_type": "multi_table_csv",
