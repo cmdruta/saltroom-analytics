@@ -266,7 +266,6 @@ bronze_clients_config = bronze_config["datasets"]["clients"]
 
 bronze_clients_table = f"{BRONZE_SCHEMA}.{bronze_clients_config['target_table']}"
 silver_clients_table = f"{SILVER_SCHEMA}.{TARGET_TABLE}"
-expected_source_file_name = Path(bronze_clients_config["path"]).name
 
 if not table_exists(bronze_clients_table):
     raise ValueError(
@@ -280,17 +279,6 @@ if "source_file_name" not in bronze_clients_df.columns:
     raise ValueError(
         f"Bronze table {bronze_clients_table} is missing source_file_name. "
         "The Bronze ingestion audit columns are required for Silver lineage and DQ checks."
-    )
-
-available_source_files = [
-    row["source_file_name"]
-    for row in bronze_clients_df.select("source_file_name").distinct().collect()
-]
-
-if expected_source_file_name not in available_source_files:
-    raise ValueError(
-        f"Expected Bronze clients source file {expected_source_file_name} was not found in {bronze_clients_table}. "
-        f"Available source files: {available_source_files}"
     )
 
 
