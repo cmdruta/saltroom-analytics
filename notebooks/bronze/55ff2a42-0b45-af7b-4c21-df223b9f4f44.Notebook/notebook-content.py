@@ -53,9 +53,9 @@ CONFIG_CANDIDATE_PATHS = [
     "/lakehouse/default/Files/config/bronze_sources.json",
     "../../config/bronze_sources.json",
 ]
-ENTITY_TO_LOAD = "visits"  # Supported values: all, clients, visits, timeclock, purchases
+ENTITY_TO_LOAD = "clients"  # Supported values: all, clients, visits, timeclock, purchases
 ENTITY_LOAD_MODES = {
-    "clients": "init",
+    "clients": "full_refresh",
     "visits": "init",
     "timeclock": "init",
     "purchases": "init",

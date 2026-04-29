@@ -53,7 +53,7 @@ from pyspark.sql import types as T
 
 # Runtime parameters
 
-LOAD_MODE = "refresh"  # Supported values: init, refresh
+LOAD_MODE = "init"  # Supported values: init, refresh
 BRONZE_CONFIG_CANDIDATE_PATHS = [
     "Files/config/bronze_sources.json",
     "/lakehouse/default/Files/config/bronze_sources.json",
@@ -574,3 +574,10 @@ print(
     f"Successfully loaded {silver_clients_table} using LOAD_MODE='{active_load_mode}'. "
     f"Final silver row count: {final_silver_row_count}."
 )
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
