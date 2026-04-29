@@ -54,7 +54,7 @@ CONFIG_CANDIDATE_PATHS = [
     "../../config/bronze_sources.json",
 ]
 
-ENTITY_TO_CHECK = "visits_attendance"  # Examples: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
+ENTITY_TO_CHECK = "visits_purchase_option"  # Examples: all, clients, visits, visits_attendance, visits_booking_source, timeclock, purchases
 BRONZE_SCHEMA = "bronze"
 
 DATE_LIKE_NAME_TOKENS = ("date", "time", "timestamp")
