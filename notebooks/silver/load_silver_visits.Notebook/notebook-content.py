@@ -504,9 +504,9 @@ booking_enriched_df = (
         (F.col("booking_candidate_count") > 1) & (F.col("booking_source_match_method") != "unmatched"),
     )
     .select(
-        *[F.col(f"b.{column_name}").alias(column_name) for column_name in base_visit_columns],
-        F.col("s.booking_source").alias("booking_source"),
-        F.col("s.booked_by").alias("booked_by"),
+        *[F.col(column_name) for column_name in base_visit_columns],
+        F.col("booking_source"),
+        F.col("booked_by"),
         "booking_source_match_method",
         "booking_source_match_score",
         "has_multiple_booking_source_matches_resolved",
@@ -612,7 +612,7 @@ id_matched_visits_df = (
     .withColumn("client_match_score", F.lit(100))
     .withColumn("has_multiple_client_matches_resolved", F.lit(False))
     .select(
-        *[F.col(f"v.{column_name}").alias(column_name) for column_name in visit_match_base_columns],
+        *[F.col(column_name) for column_name in visit_match_base_columns],
         "salt_client_key",
         "source_client_id",
         "source_member_id",
@@ -625,7 +625,7 @@ id_matched_visits_df = (
 name_fallback_visits_df = (
     id_joined_visits_df
     .filter(~F.col("client_id_match_found"))
-    .select(*[F.col(f"v.{column_name}").alias(column_name) for column_name in visit_match_base_columns])
+    .select(*[F.col(column_name) for column_name in visit_match_base_columns])
 )
 
 client_name_candidates_df = clients_prepared_df.select(
@@ -701,7 +701,7 @@ fallback_client_matched_df = (
         (F.col("client_candidate_count") > 1) & (F.col("client_match_method") != "unmatched"),
     )
     .select(
-        *[F.col(f"v.{column_name}").alias(column_name) for column_name in visit_match_base_columns],
+        *[F.col(column_name) for column_name in visit_match_base_columns],
         "salt_client_key",
         "source_client_id",
         "source_member_id",
