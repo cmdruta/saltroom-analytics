@@ -144,24 +144,42 @@ def null_if_blank(column_expression) -> F.Column:
 def parse_work_date(column_expression) -> F.Column:
     string_value = null_if_blank(column_expression)
     shortened_value = F.when(string_value.isNotNull(), F.substring(string_value, 1, 9)).otherwise(F.lit(None))
-    parsed_timestamp = F.coalesce(
-        F.to_timestamp(string_value, "d-MMM-yy"),
-        F.to_timestamp(string_value, "dd-MMM-yy"),
-        F.to_timestamp(string_value, "yyyy-MM-dd HH:mm:ss"),
-        F.to_timestamp(string_value, "yyyy-MM-dd'T'HH:mm:ss"),
-        F.to_timestamp(string_value, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
-        F.to_timestamp(string_value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+    trimmed_date_text = F.upper(shortened_value)
+
+    day_part = F.regexp_extract(trimmed_date_text, r"^(\d{1,2})-[A-Z]{3}-(\d{2})$", 1)
+    month_part = F.regexp_extract(trimmed_date_text, r"^\d{1,2}-([A-Z]{3})-(\d{2})$", 1)
+    year_part = F.regexp_extract(trimmed_date_text, r"^\d{1,2}-[A-Z]{3}-(\d{2})$", 1)
+
+    month_map = F.create_map(
+        F.lit("JAN"), F.lit(1),
+        F.lit("FEB"), F.lit(2),
+        F.lit("MAR"), F.lit(3),
+        F.lit("APR"), F.lit(4),
+        F.lit("MAY"), F.lit(5),
+        F.lit("JUN"), F.lit(6),
+        F.lit("JUL"), F.lit(7),
+        F.lit("AUG"), F.lit(8),
+        F.lit("SEP"), F.lit(9),
+        F.lit("OCT"), F.lit(10),
+        F.lit("NOV"), F.lit(11),
+        F.lit("DEC"), F.lit(12),
     )
+
+    parsed_dd_mmm_yy = F.when(
+        (day_part != "") & (month_part != "") & (year_part != ""),
+        F.make_date(
+            (F.lit(2000) + year_part.cast("int")),
+            month_map[month_part],
+            day_part.cast("int"),
+        ),
+    )
+
     return F.coalesce(
         column_expression.cast("date"),
-        F.to_date(string_value, "d-MMM-yy"),
-        F.to_date(string_value, "dd-MMM-yy"),
+        parsed_dd_mmm_yy,
         F.to_date(string_value, "yyyy-MM-dd"),
         F.to_date(string_value, "M/d/yyyy"),
         F.to_date(string_value, "MM/dd/yyyy"),
-        F.to_date(shortened_value, "d-MMM-yy"),
-        F.to_date(shortened_value, "dd-MMM-yy"),
-        F.to_date(parsed_timestamp),
     )
 
 
