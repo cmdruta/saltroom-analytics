@@ -244,6 +244,7 @@ def build_dq_notes() -> F.Column:
         "; ",
         F.when(F.col("duplicate_name_count") > 1, F.lit("duplicate normalized client name merged into one silver record")),
         F.when(F.col("source_client_id").isNull(), F.lit("missing source client id")),
+        F.when(F.col("source_member_id").isNull(), F.lit("missing source member id")),
         F.when(F.col("email_clean").isNull(), F.lit("missing email")),
         F.when(F.col("phone_clean").isNull(), F.lit("missing phone")),
     )
@@ -459,6 +460,7 @@ silver_clients_df = (
         "client_last_name_clean",
         "client_full_name_clean",
         "source_client_id",
+        "source_member_id",
         "email_clean",
         "phone_clean",
         "client_status",
@@ -501,6 +503,7 @@ final_silver_row_count = silver_clients_df.count()
 rows_missing_email = silver_clients_df.filter(F.col("email_clean").isNull()).count()
 rows_missing_phone = silver_clients_df.filter(F.col("phone_clean").isNull()).count()
 rows_missing_source_client_id = silver_clients_df.filter(F.col("source_client_id").isNull()).count()
+rows_missing_source_member_id = silver_clients_df.filter(F.col("source_member_id").isNull()).count()
 rows_where_dedupe_chose_among_duplicates = silver_clients_df.filter(F.col("duplicate_name_count") > 1).count()
 
 dq_summary_rows = [
@@ -513,6 +516,7 @@ dq_summary_rows = [
     ("rows_missing_email", rows_missing_email),
     ("rows_missing_phone", rows_missing_phone),
     ("rows_missing_source_client_id", rows_missing_source_client_id),
+    ("rows_missing_source_member_id", rows_missing_source_member_id),
     ("rows_where_dedupe_chose_among_duplicates", rows_where_dedupe_chose_among_duplicates),
 ]
 
