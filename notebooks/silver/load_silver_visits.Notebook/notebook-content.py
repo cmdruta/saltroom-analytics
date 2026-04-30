@@ -26,12 +26,12 @@
 #
 # Architecture note:
 # silver.visits is a cleaned attendance-level entity at one row per visit record from
-# bronze.visits_purchase_options. It is not the final reporting fact table. Gold will later
+# bronze.visits_purchase_option. It is not the final reporting fact table. Gold will later
 # create attendance facts, retention metrics, booking-source analysis, package utilization,
 # and visit frequency models.
 #
 # Source strategy:
-# - bronze.visits_purchase_options is the authoritative base
+# - bronze.visits_purchase_option is the authoritative base
 # - bronze.visits_booking_source is enrichment only for booking_source and booked_by
 # - silver.clients provides client keys and matched source identifiers
 #
@@ -67,7 +67,7 @@ LOAD_MODE = "init"  # Supported values: init, refresh
 
 BRONZE_SCHEMA = "bronze"
 SILVER_SCHEMA = "silver"
-BASE_VISITS_TABLE = f"{BRONZE_SCHEMA}.visits_purchase_options"
+BASE_VISITS_TABLE = f"{BRONZE_SCHEMA}.visits_purchase_option"
 BOOKING_SOURCE_TABLE = f"{BRONZE_SCHEMA}.visits_booking_source"
 SILVER_CLIENTS_TABLE = f"{SILVER_SCHEMA}.clients"
 SILVER_VISITS_TABLE = f"{SILVER_SCHEMA}.visits"
