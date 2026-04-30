@@ -389,6 +389,19 @@ booking_source_prepared_df = (
     .withColumn("source_loaded_at", F.col(booking_loaded_at_column).cast("timestamp") if booking_loaded_at_column else F.lit(None).cast("timestamp"))
 )
 
+booking_source_match_df = booking_source_prepared_df.select(
+    F.col("_booking_row_id"),
+    F.col("service_name_key").alias("booking_service_name_key"),
+    F.col("visit_date").alias("booking_visit_date"),
+    F.col("visit_time").alias("booking_visit_time"),
+    F.col("client_name_key").alias("booking_client_name_key"),
+    F.col("visit_client_identifier").alias("booking_visit_client_identifier"),
+    F.col("visit_email_clean").alias("booking_visit_email_clean"),
+    F.col("visit_phone_clean").alias("booking_visit_phone_clean"),
+    F.col("booking_source"),
+    F.col("booked_by"),
+)
+
 
 # METADATA ********************
 
@@ -410,10 +423,10 @@ booking_source_prepared_df = (
 booking_candidates_df = (
     base_visits_prepared_df.alias("b")
     .join(
-        booking_source_prepared_df.alias("s"),
-        (F.col("b.service_name_key") == F.col("s.service_name_key"))
-        & (F.col("b.visit_date") == F.col("s.visit_date"))
-        & (F.col("b.visit_time") == F.col("s.visit_time")),
+        booking_source_match_df.alias("s"),
+        (F.col("b.service_name_key") == F.col("s.booking_service_name_key"))
+        & (F.col("b.visit_date") == F.col("s.booking_visit_date"))
+        & (F.col("b.visit_time") == F.col("s.booking_visit_time")),
         "left",
     )
     .withColumn("has_booking_candidate", F.col("s._booking_row_id").isNotNull())
@@ -422,7 +435,7 @@ booking_candidates_df = (
         F.when(
             F.col("s._booking_row_id").isNotNull()
             & F.col("b.visit_client_identifier").isNotNull()
-            & (F.col("b.visit_client_identifier") == F.col("s.visit_client_identifier")),
+            & (F.col("b.visit_client_identifier") == F.col("s.booking_visit_client_identifier")),
             F.lit(100),
         ).otherwise(F.lit(0)),
     )
@@ -431,7 +444,7 @@ booking_candidates_df = (
         F.when(
             F.col("s._booking_row_id").isNotNull()
             & F.col("b.client_name_key").isNotNull()
-            & (F.col("b.client_name_key") == F.col("s.client_name_key")),
+            & (F.col("b.client_name_key") == F.col("s.booking_client_name_key")),
             F.lit(75),
         ).otherwise(F.lit(0)),
     )
@@ -440,7 +453,7 @@ booking_candidates_df = (
         F.when(
             F.col("s._booking_row_id").isNotNull()
             & F.col("b.visit_email_clean").isNotNull()
-            & (F.col("b.visit_email_clean") == F.col("s.visit_email_clean")),
+            & (F.col("b.visit_email_clean") == F.col("s.booking_visit_email_clean")),
             F.lit(50),
         ).otherwise(F.lit(0)),
     )
@@ -449,7 +462,7 @@ booking_candidates_df = (
         F.when(
             F.col("s._booking_row_id").isNotNull()
             & F.col("b.visit_phone_clean").isNotNull()
-            & (F.col("b.visit_phone_clean") == F.col("s.visit_phone_clean")),
+            & (F.col("b.visit_phone_clean") == F.col("s.booking_visit_phone_clean")),
             F.lit(50),
         ).otherwise(F.lit(0)),
     )
@@ -505,8 +518,8 @@ booking_enriched_df = (
     )
     .select(
         *[F.col(column_name) for column_name in base_visit_columns],
-        F.col("booking_source"),
-        F.col("booked_by"),
+        F.col("s.booking_source").alias("booking_source"),
+        F.col("s.booked_by").alias("booked_by"),
         "booking_source_match_method",
         "booking_source_match_score",
         "has_multiple_booking_source_matches_resolved",
@@ -546,32 +559,32 @@ clients_prepared_df = (
 client_id_reference_df = (
     clients_prepared_df
     .select(
-        "salt_client_key",
-        "source_client_id",
-        "source_member_id",
-        "client_name_key",
-        "email_clean",
-        "phone_clean",
-        "client_status",
-        "registration_date",
-        "dedupe_score",
-        "duplicate_name_count",
+        F.col("salt_client_key").alias("matched_salt_client_key"),
+        F.col("source_client_id").alias("matched_source_client_id"),
+        F.col("source_member_id").alias("matched_source_member_id"),
+        F.col("client_name_key").alias("matched_client_name_key"),
+        F.col("email_clean").alias("matched_email_clean"),
+        F.col("phone_clean").alias("matched_phone_clean"),
+        F.col("client_status").alias("matched_client_status"),
+        F.col("registration_date").alias("matched_registration_date"),
+        F.col("dedupe_score").alias("matched_dedupe_score"),
+        F.col("duplicate_name_count").alias("matched_duplicate_name_count"),
         F.col("source_member_id").alias("_match_identifier"),
     )
     .filter(F.col("_match_identifier").isNotNull())
     .unionByName(
         clients_prepared_df
         .select(
-            "salt_client_key",
-            "source_client_id",
-            "source_member_id",
-            "client_name_key",
-            "email_clean",
-            "phone_clean",
-            "client_status",
-            "registration_date",
-            "dedupe_score",
-            "duplicate_name_count",
+            F.col("salt_client_key").alias("matched_salt_client_key"),
+            F.col("source_client_id").alias("matched_source_client_id"),
+            F.col("source_member_id").alias("matched_source_member_id"),
+            F.col("client_name_key").alias("matched_client_name_key"),
+            F.col("email_clean").alias("matched_email_clean"),
+            F.col("phone_clean").alias("matched_phone_clean"),
+            F.col("client_status").alias("matched_client_status"),
+            F.col("registration_date").alias("matched_registration_date"),
+            F.col("dedupe_score").alias("matched_dedupe_score"),
+            F.col("duplicate_name_count").alias("matched_duplicate_name_count"),
             F.col("source_client_id").alias("_match_identifier"),
         )
         .filter(F.col("_match_identifier").isNotNull()),
@@ -580,10 +593,10 @@ client_id_reference_df = (
 )
 
 client_id_match_window = Window.partitionBy("_match_identifier").orderBy(
-    F.col("duplicate_name_count").asc_nulls_last(),
-    F.col("dedupe_score").desc_nulls_last(),
-    F.col("registration_date").desc_nulls_last(),
-    F.col("source_client_id").asc_nulls_last(),
+    F.col("matched_duplicate_name_count").asc_nulls_last(),
+    F.col("matched_dedupe_score").desc_nulls_last(),
+    F.col("matched_registration_date").desc_nulls_last(),
+    F.col("matched_source_client_id").asc_nulls_last(),
 )
 
 client_id_reference_df = (
@@ -599,15 +612,15 @@ id_joined_visits_df = (
         F.col("v.visit_client_identifier") == F.col("c._match_identifier"),
         "left",
     )
-    .withColumn("client_id_match_found", F.col("c.salt_client_key").isNotNull())
+    .withColumn("client_id_match_found", F.col("c.matched_salt_client_key").isNotNull())
 )
 
 id_matched_visits_df = (
     id_joined_visits_df
     .filter(F.col("client_id_match_found"))
-    .withColumn("salt_client_key", F.col("c.salt_client_key"))
-    .withColumn("source_client_id", F.col("c.source_client_id"))
-    .withColumn("source_member_id", F.col("c.source_member_id"))
+    .withColumn("salt_client_key", F.col("c.matched_salt_client_key"))
+    .withColumn("source_client_id", F.col("c.matched_source_client_id"))
+    .withColumn("source_member_id", F.col("c.matched_source_member_id"))
     .withColumn("client_match_method", F.lit("client_id_or_member_id"))
     .withColumn("client_match_score", F.lit(100))
     .withColumn("has_multiple_client_matches_resolved", F.lit(False))
