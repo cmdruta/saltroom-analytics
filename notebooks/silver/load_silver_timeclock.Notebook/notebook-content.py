@@ -143,32 +143,10 @@ def null_if_blank(column_expression) -> F.Column:
 
 def parse_work_date(column_expression) -> F.Column:
     string_value = null_if_blank(column_expression)
-    shortened_value = F.when(string_value.isNotNull(), F.substring(string_value, 1, 9)).otherwise(F.lit(None))
-    normalized_dd_mmm_yy = F.upper(shortened_value)
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-JAN-", "-01-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-FEB-", "-02-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-MAR-", "-03-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-APR-", "-04-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-MAY-", "-05-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-JUN-", "-06-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-JUL-", "-07-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-AUG-", "-08-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-SEP-", "-09-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-OCT-", "-10-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-NOV-", "-11-")
-    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-DEC-", "-12-")
-
-    day_part = F.regexp_extract(normalized_dd_mmm_yy, r"^(\d{1,2})-(\d{2})-(\d{2})$", 1)
-    month_part = F.regexp_extract(normalized_dd_mmm_yy, r"^(\d{1,2})-(\d{2})-(\d{2})$", 2)
-    year_part = F.regexp_extract(normalized_dd_mmm_yy, r"^(\d{1,2})-(\d{2})-(\d{2})$", 3)
-    normalized_yyyy_mm_dd = F.when(
-        (day_part != "") & (month_part != "") & (year_part != ""),
-        F.concat(F.lit("20"), year_part, F.lit("-"), month_part, F.lit("-"), F.lpad(day_part, 2, "0")),
-    )
-
     return F.coalesce(
         column_expression.cast("date"),
-        F.to_date(normalized_yyyy_mm_dd, "yyyy-MM-dd"),
+        F.to_date(string_value, "MMM d, yyyy"),
+        F.to_date(string_value, "MMM dd, yyyy"),
         F.to_date(string_value, "yyyy-MM-dd"),
         F.to_date(string_value, "M/d/yyyy"),
         F.to_date(string_value, "MM/dd/yyyy"),
