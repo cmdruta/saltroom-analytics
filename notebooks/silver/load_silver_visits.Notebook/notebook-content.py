@@ -481,6 +481,8 @@ booking_candidates_df = (
     )
     .withColumn("_base_row_id", F.col("b._base_row_id"))
     .withColumn("_booking_row_id", F.col("s._booking_row_id"))
+    .withColumn("matched_booking_source", F.col("s.booking_source"))
+    .withColumn("matched_booked_by", F.col("s.booked_by"))
 )
 
 booking_candidate_counts_df = (
@@ -518,8 +520,8 @@ booking_enriched_df = (
     )
     .select(
         *[F.col(column_name) for column_name in base_visit_columns],
-        F.col("s.booking_source").alias("booking_source"),
-        F.col("s.booked_by").alias("booked_by"),
+        F.col("matched_booking_source").alias("booking_source"),
+        F.col("matched_booked_by").alias("booked_by"),
         "booking_source_match_method",
         "booking_source_match_score",
         "has_multiple_booking_source_matches_resolved",
@@ -613,14 +615,17 @@ id_joined_visits_df = (
         "left",
     )
     .withColumn("client_id_match_found", F.col("c.matched_salt_client_key").isNotNull())
+    .withColumn("resolved_salt_client_key", F.col("c.matched_salt_client_key"))
+    .withColumn("resolved_source_client_id", F.col("c.matched_source_client_id"))
+    .withColumn("resolved_source_member_id", F.col("c.matched_source_member_id"))
 )
 
 id_matched_visits_df = (
     id_joined_visits_df
     .filter(F.col("client_id_match_found"))
-    .withColumn("salt_client_key", F.col("c.matched_salt_client_key"))
-    .withColumn("source_client_id", F.col("c.matched_source_client_id"))
-    .withColumn("source_member_id", F.col("c.matched_source_member_id"))
+    .withColumn("salt_client_key", F.col("resolved_salt_client_key"))
+    .withColumn("source_client_id", F.col("resolved_source_client_id"))
+    .withColumn("source_member_id", F.col("resolved_source_member_id"))
     .withColumn("client_match_method", F.lit("client_id_or_member_id"))
     .withColumn("client_match_score", F.lit(100))
     .withColumn("has_multiple_client_matches_resolved", F.lit(False))
@@ -682,6 +687,9 @@ client_candidates_df = (
         ).otherwise(F.lit(-1)),
     )
     .withColumn("_base_row_id", F.col("v._base_row_id"))
+    .withColumn("resolved_salt_client_key", F.col("c.candidate_salt_client_key"))
+    .withColumn("resolved_source_client_id", F.col("c.candidate_source_client_id"))
+    .withColumn("resolved_source_member_id", F.col("c.candidate_source_member_id"))
 )
 
 client_candidate_counts_df = (
@@ -702,9 +710,9 @@ fallback_client_matched_df = (
     .join(client_candidate_counts_df, ["_base_row_id"], "left")
     .withColumn("_client_match_rank", F.row_number().over(client_match_window))
     .filter(F.col("_client_match_rank") == 1)
-    .withColumn("salt_client_key", F.col("c.candidate_salt_client_key"))
-    .withColumn("source_client_id", F.col("c.candidate_source_client_id"))
-    .withColumn("source_member_id", F.col("c.candidate_source_member_id"))
+    .withColumn("salt_client_key", F.col("resolved_salt_client_key"))
+    .withColumn("source_client_id", F.col("resolved_source_client_id"))
+    .withColumn("source_member_id", F.col("resolved_source_member_id"))
     .withColumn(
         "client_match_method",
         F.when(F.col("has_client_candidate"), F.lit("name_email_phone_score")).otherwise(F.lit("unmatched")),
