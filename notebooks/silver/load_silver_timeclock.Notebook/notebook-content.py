@@ -143,6 +143,15 @@ def null_if_blank(column_expression) -> F.Column:
 
 def parse_work_date(column_expression) -> F.Column:
     string_value = null_if_blank(column_expression)
+    shortened_value = F.when(string_value.isNotNull(), F.substring(string_value, 1, 9)).otherwise(F.lit(None))
+    parsed_timestamp = F.coalesce(
+        F.to_timestamp(string_value, "d-MMM-yy"),
+        F.to_timestamp(string_value, "dd-MMM-yy"),
+        F.to_timestamp(string_value, "yyyy-MM-dd HH:mm:ss"),
+        F.to_timestamp(string_value, "yyyy-MM-dd'T'HH:mm:ss"),
+        F.to_timestamp(string_value, "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+        F.to_timestamp(string_value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+    )
     return F.coalesce(
         column_expression.cast("date"),
         F.to_date(string_value, "d-MMM-yy"),
@@ -150,6 +159,9 @@ def parse_work_date(column_expression) -> F.Column:
         F.to_date(string_value, "yyyy-MM-dd"),
         F.to_date(string_value, "M/d/yyyy"),
         F.to_date(string_value, "MM/dd/yyyy"),
+        F.to_date(shortened_value, "d-MMM-yy"),
+        F.to_date(shortened_value, "dd-MMM-yy"),
+        F.to_date(parsed_timestamp),
     )
 
 
@@ -189,8 +201,7 @@ def require_columns(dataframe: DataFrame, required_columns: list[str], table_nam
 
 def build_primary_dq_status() -> F.Column:
     return (
-        F.when(F.col("staff_name_clean").isNull(), F.lit("FAIL_MISSING_STAFF_MEMBER"))
-        .when(F.col("work_date_raw").isNull(), F.lit("FAIL_MISSING_WORK_DATE"))
+        F.when(F.col("work_date_raw").isNull(), F.lit("FAIL_MISSING_WORK_DATE"))
         .when(F.col("hours_raw").isNull(), F.lit("FAIL_MISSING_HOURS"))
         .when(F.col("work_date").isNull(), F.lit("FAIL_MISSING_WORK_DATE"))
         .when(F.col("hours_worked_original").isNull(), F.lit("FAIL_INVALID_HOURS"))
@@ -284,6 +295,9 @@ prepared_timeclock_df = (
     )
 )
 
+rows_missing_staff_member = prepared_timeclock_df.filter(F.col("staff_name_clean").isNull()).count()
+prepared_timeclock_df = prepared_timeclock_df.filter(F.col("staff_name_clean").isNotNull())
+
 
 # METADATA ********************
 
@@ -316,7 +330,6 @@ final_silver_timeclock_df = (
         "dq_notes",
         F.concat_ws(
             "; ",
-            F.when(F.col("staff_name_clean").isNull(), F.lit("Missing staff member.")),
             F.when(F.col("work_date_raw").isNull(), F.lit("Missing work date.")),
             F.when(F.col("work_date_raw").isNotNull() & F.col("work_date").isNull(), F.lit("Failed work date parsing.")),
             F.when(F.col("hours_raw").isNull(), F.lit("Missing hours.")),
@@ -364,7 +377,7 @@ dq_summary_row = (
         F.max("work_date").alias("max_work_date"),
         F.sum(F.coalesce(F.col("hours_worked_original"), F.lit(0).cast(T.DecimalType(10, 4)))).alias("total_hours_worked_original"),
         F.sum(F.coalesce(F.col("hours_worked"), F.lit(0).cast(T.DecimalType(10, 4)))).alias("total_hours_worked"),
-        F.sum(F.when(F.col("staff_name_clean").isNull(), F.lit(1)).otherwise(F.lit(0))).alias("rows_missing_staff_member"),
+        F.lit(rows_missing_staff_member).alias("rows_missing_staff_member"),
         F.sum(F.when(F.col("work_date_raw").isNull(), F.lit(1)).otherwise(F.lit(0))).alias("rows_missing_work_date"),
         F.sum(F.when(F.col("work_date_raw").isNotNull() & F.col("work_date").isNull(), F.lit(1)).otherwise(F.lit(0))).alias("rows_with_failed_date_parsing"),
         F.sum(F.when(F.col("hours_raw").isNull(), F.lit(1)).otherwise(F.lit(0))).alias("rows_missing_hours"),
