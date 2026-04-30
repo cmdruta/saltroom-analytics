@@ -224,6 +224,25 @@ def build_primary_dq_status() -> F.Column:
     )
 
 
+def build_incremental_row_fingerprint(dataframe: DataFrame) -> F.Column:
+    return F.sha2(
+        F.to_json(
+            F.struct(
+                F.coalesce(F.col("client_name_key"), F.lit("")),
+                F.coalesce(F.date_format(F.col("purchase_datetime"), "yyyy-MM-dd HH:mm:ss"), F.lit("")),
+                F.coalesce(F.col("item_name_clean"), F.lit("")),
+                F.coalesce(F.col("revenue_category_clean"), F.lit("")),
+                F.coalesce(F.col("source_member_id"), F.lit("")),
+                F.coalesce(F.col("source_client_id"), F.lit("")),
+                F.coalesce(F.col("subtotal_amount").cast("string"), F.lit("")),
+                F.coalesce(F.col("net_sales_amount").cast("string"), F.lit("")),
+                F.coalesce(F.col("total_paid_amount").cast("string"), F.lit("")),
+            )
+        ),
+        256,
+    )
+
+
 # METADATA ********************
 
 # META {
@@ -823,16 +842,102 @@ display(
 # CELL ********************
 
 # Write silver.purchases
+#
+# Load mode behavior:
+# - init: create or replace silver.purchases from the current Bronze-derived batch
+# - refresh: append only new purchases that are not already present in silver.purchases
+#   The primary incremental key is source_purchase_item_id. For the small number of rows
+#   missing that key, use a stable fallback fingerprint based on transaction content.
 
 ensure_schema_exists(SILVER_SCHEMA)
 
-(
-    final_silver_purchases_df.write
-    .format("delta")
-    .mode("overwrite")
-    .option("overwriteSchema", "true")
-    .saveAsTable(SILVER_PURCHASES_TABLE)
+write_batch_df = final_silver_purchases_df.withColumn(
+    "_incremental_row_fingerprint",
+    build_incremental_row_fingerprint(final_silver_purchases_df),
 )
+
+rows_selected_for_write_count = write_batch_df.count()
+
+if active_load_mode == "init" or not table_exists(SILVER_PURCHASES_TABLE):
+    (
+        write_batch_df
+        .drop("_incremental_row_fingerprint")
+        .write
+        .format("delta")
+        .mode("overwrite")
+        .option("overwriteSchema", "true")
+        .saveAsTable(SILVER_PURCHASES_TABLE)
+    )
+else:
+    existing_silver_df = spark.table(SILVER_PURCHASES_TABLE)
+    require_columns(
+        existing_silver_df,
+        [
+            "source_purchase_item_id",
+            "client_name_key",
+            "purchase_datetime",
+            "item_name_clean",
+            "revenue_category_clean",
+            "source_member_id",
+            "source_client_id",
+            "subtotal_amount",
+            "net_sales_amount",
+            "total_paid_amount",
+        ],
+        SILVER_PURCHASES_TABLE,
+    )
+
+    existing_silver_df = existing_silver_df.withColumn(
+        "_incremental_row_fingerprint",
+        build_incremental_row_fingerprint(existing_silver_df),
+    )
+
+    existing_purchase_ids_df = (
+        existing_silver_df
+        .filter(F.col("source_purchase_item_id").isNotNull())
+        .select(F.col("source_purchase_item_id").alias("_existing_source_purchase_item_id"))
+        .distinct()
+    )
+
+    existing_null_id_fingerprints_df = (
+        existing_silver_df
+        .filter(F.col("source_purchase_item_id").isNull())
+        .select(F.col("_incremental_row_fingerprint").alias("_existing_incremental_row_fingerprint"))
+        .distinct()
+    )
+
+    new_keyed_rows_df = (
+        write_batch_df
+        .filter(F.col("source_purchase_item_id").isNotNull())
+        .join(
+            existing_purchase_ids_df,
+            F.col("source_purchase_item_id") == F.col("_existing_source_purchase_item_id"),
+            "left_anti",
+        )
+    )
+
+    new_unkeyed_rows_df = (
+        write_batch_df
+        .filter(F.col("source_purchase_item_id").isNull())
+        .join(
+            existing_null_id_fingerprints_df,
+            F.col("_incremental_row_fingerprint") == F.col("_existing_incremental_row_fingerprint"),
+            "left_anti",
+        )
+    )
+
+    refresh_append_df = new_keyed_rows_df.unionByName(new_unkeyed_rows_df, allowMissingColumns=True)
+    rows_selected_for_write_count = refresh_append_df.count()
+
+    if rows_selected_for_write_count > 0:
+        (
+            refresh_append_df
+            .drop("_incremental_row_fingerprint")
+            .write
+            .format("delta")
+            .mode("append")
+            .saveAsTable(SILVER_PURCHASES_TABLE)
+        )
 
 
 # METADATA ********************
@@ -844,14 +949,17 @@ ensure_schema_exists(SILVER_SCHEMA)
 
 # CELL ********************
 
-final_row_count = final_silver_purchases_df.count()
-matched_row_count = final_silver_purchases_df.filter(F.col("client_match_method") != "unmatched").count()
-unmatched_row_count = final_silver_purchases_df.filter(F.col("client_match_method") == "unmatched").count()
-dq_warning_count = final_silver_purchases_df.filter(F.col("dq_status") != "PASS").count()
+written_rows_df = spark.table(SILVER_PURCHASES_TABLE)
+
+final_row_count = written_rows_df.count()
+matched_row_count = written_rows_df.filter(F.col("client_match_method") != "unmatched").count()
+unmatched_row_count = written_rows_df.filter(F.col("client_match_method") == "unmatched").count()
+dq_warning_count = written_rows_df.filter(F.col("dq_status") != "PASS").count()
 
 print(
     f"Successfully loaded {SILVER_PURCHASES_TABLE} using LOAD_MODE='{active_load_mode}'. "
-    f"Final row count: {final_row_count}. "
+    f"Rows written this run: {rows_selected_for_write_count}. "
+    f"Final table row count: {final_row_count}. "
     f"Matched to clients: {matched_row_count}. "
     f"Unmatched: {unmatched_row_count}. "
     f"DQ warnings/failures: {dq_warning_count}."
