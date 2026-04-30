@@ -204,10 +204,6 @@ def non_blank_decimal_input(column_expression) -> F.Column:
     return null_if_blank(column_expression).isNotNull()
 
 
-def build_notes_array(*note_columns: F.Column) -> F.Column:
-    return F.array_remove(F.array(*note_columns), F.lit(None))
-
-
 def build_primary_dq_status() -> F.Column:
     return (
         F.when(F.col("source_purchase_item_id").isNull(), F.lit("FAIL_MISSING_PURCHASE_ITEM_ID"))
@@ -689,30 +685,29 @@ enriched_purchases_df = (
     )
 )
 
-enriched_purchases_df = enriched_purchases_df.withColumn(
-    "dq_notes_array",
-    build_notes_array(
-        F.when(F.col("source_purchase_item_id").isNull(), F.lit("missing source purchase item id")),
-        F.when(F.col("has_duplicate_source_purchase_item_id"), F.lit("duplicate source_purchase_item_id found in bronze purchases; latest row kept for silver")),
-        F.when(F.col("has_missing_purchase_date"), F.lit("missing purchase date")),
-        F.when(F.col("has_failed_datetime_parsing"), F.lit("failed date/time parsing")),
-        F.when(F.col("has_failed_amount_parsing"), F.lit("failed amount parsing for one or more monetary fields")),
-        F.when(F.col("source_member_id").isNull(), F.lit("missing member id")),
-        F.when(F.col("client_match_method").isin("name_email_phone_score", "name_only"), F.lit("client matched by normalized name fallback")),
-        F.when(F.col("client_match_method") == "unmatched", F.lit("client not matched to silver.clients")),
-        F.when(F.col("has_multiple_client_matches_resolved"), F.lit("multiple client matches resolved by deterministic score")),
-        F.when(F.col("has_revenue_category_cleanup_warning"), F.lit("revenue category cleaned from item/category rules")),
-        F.when(F.col("has_revenue_category_first_value_fallback"), F.lit("multi-value revenue category kept first non-blank value")),
-        F.when(F.col("has_gift_card_normalization"), F.lit("item normalized to Gift Card")),
-        F.when(F.col("has_negative_total_paid_amount"), F.lit("negative total paid amount")),
-        F.when(F.col("has_tax_defaulted_to_zero"), F.lit("tax amount defaulted to 0 because Total Taxes was blank")),
-        F.when(F.col("has_amount_reconciliation_warning"), F.lit("amount reconciliation warning: total_paid_amount differs from net_sales_amount + tax_amount + account_change_amount")),
-    ),
-)
-
 final_silver_purchases_df = (
     enriched_purchases_df
-    .withColumn("dq_notes", F.concat_ws("; ", F.col("dq_notes_array")))
+    .withColumn(
+        "dq_notes",
+        F.concat_ws(
+            "; ",
+            F.when(F.col("source_purchase_item_id").isNull(), F.lit("missing source purchase item id")),
+            F.when(F.col("has_duplicate_source_purchase_item_id"), F.lit("duplicate source_purchase_item_id found in bronze purchases; latest row kept for silver")),
+            F.when(F.col("has_missing_purchase_date"), F.lit("missing purchase date")),
+            F.when(F.col("has_failed_datetime_parsing"), F.lit("failed date/time parsing")),
+            F.when(F.col("has_failed_amount_parsing"), F.lit("failed amount parsing for one or more monetary fields")),
+            F.when(F.col("source_member_id").isNull(), F.lit("missing member id")),
+            F.when(F.col("client_match_method").isin("name_email_phone_score", "name_only"), F.lit("client matched by normalized name fallback")),
+            F.when(F.col("client_match_method") == "unmatched", F.lit("client not matched to silver.clients")),
+            F.when(F.col("has_multiple_client_matches_resolved"), F.lit("multiple client matches resolved by deterministic score")),
+            F.when(F.col("has_revenue_category_cleanup_warning"), F.lit("revenue category cleaned from item/category rules")),
+            F.when(F.col("has_revenue_category_first_value_fallback"), F.lit("multi-value revenue category kept first non-blank value")),
+            F.when(F.col("has_gift_card_normalization"), F.lit("item normalized to Gift Card")),
+            F.when(F.col("has_negative_total_paid_amount"), F.lit("negative total paid amount")),
+            F.when(F.col("has_tax_defaulted_to_zero"), F.lit("tax amount defaulted to 0 because Total Taxes was blank")),
+            F.when(F.col("has_amount_reconciliation_warning"), F.lit("amount reconciliation warning: total_paid_amount differs from net_sales_amount + tax_amount + account_change_amount")),
+        ),
+    )
     .withColumn("dq_status", build_primary_dq_status())
     .select(
         "salt_purchase_key",
