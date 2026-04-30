@@ -422,6 +422,11 @@ deduped_keyed_purchases_df = (
 deduped_unkeyed_purchases_df = prepared_purchases_df.filter(F.col("source_purchase_item_id").isNull())
 
 source_purchases_df = deduped_keyed_purchases_df.unionByName(deduped_unkeyed_purchases_df, allowMissingColumns=True)
+matched_purchase_base_columns = [
+    column_name
+    for column_name in source_purchases_df.columns
+    if column_name != "_purchase_row_id"
+]
 
 
 # METADATA ********************
@@ -517,7 +522,15 @@ member_matched_purchases_df = (
     .withColumn("client_match_score", F.lit(1000))
     .withColumn("name_match_candidate_count", F.lit(0))
     .withColumn("has_multiple_client_matches_resolved", F.lit(False))
-    .select("p.*", "salt_client_key", "source_client_id", "client_match_method", "client_match_score", "name_match_candidate_count", "has_multiple_client_matches_resolved")
+    .select(
+        *[F.col(f"p.{column_name}").alias(column_name) for column_name in matched_purchase_base_columns],
+        "salt_client_key",
+        "source_client_id",
+        "client_match_method",
+        "client_match_score",
+        "name_match_candidate_count",
+        "has_multiple_client_matches_resolved",
+    )
 )
 
 name_fallback_purchases_df = member_joined_purchases_df.filter(~F.col("member_match_found")).select("p.*")
@@ -581,7 +594,15 @@ best_name_matches_df = (
     .withColumn("salt_client_key", F.col("candidate_salt_client_key"))
     .withColumn("source_client_id", F.col("candidate_source_client_id"))
     .withColumn("has_multiple_client_matches_resolved", F.col("name_match_candidate_count") > 1)
-    .select("p.*", "salt_client_key", "source_client_id", "client_match_method", "client_match_score", "name_match_candidate_count", "has_multiple_client_matches_resolved")
+    .select(
+        *[F.col(f"p.{column_name}").alias(column_name) for column_name in matched_purchase_base_columns],
+        "salt_client_key",
+        "source_client_id",
+        "client_match_method",
+        "client_match_score",
+        "name_match_candidate_count",
+        "has_multiple_client_matches_resolved",
+    )
 )
 
 matched_purchases_df = member_matched_purchases_df.unionByName(best_name_matches_df, allowMissingColumns=True)
