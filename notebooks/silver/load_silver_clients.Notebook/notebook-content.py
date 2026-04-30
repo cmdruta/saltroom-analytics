@@ -53,7 +53,7 @@ from pyspark.sql import types as T
 
 # Runtime parameters
 
-LOAD_MODE = "init"  # Supported values: init, refresh
+LOAD_MODE = "refresh"  # Supported values: init, refresh
 BRONZE_CONFIG_CANDIDATE_PATHS = [
     "Files/config/bronze_sources.json",
     "/lakehouse/default/Files/config/bronze_sources.json",
