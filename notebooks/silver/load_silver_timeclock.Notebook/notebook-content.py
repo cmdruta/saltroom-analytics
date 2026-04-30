@@ -144,39 +144,31 @@ def null_if_blank(column_expression) -> F.Column:
 def parse_work_date(column_expression) -> F.Column:
     string_value = null_if_blank(column_expression)
     shortened_value = F.when(string_value.isNotNull(), F.substring(string_value, 1, 9)).otherwise(F.lit(None))
-    trimmed_date_text = F.upper(shortened_value)
+    normalized_dd_mmm_yy = F.upper(shortened_value)
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-JAN-", "-01-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-FEB-", "-02-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-MAR-", "-03-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-APR-", "-04-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-MAY-", "-05-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-JUN-", "-06-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-JUL-", "-07-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-AUG-", "-08-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-SEP-", "-09-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-OCT-", "-10-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-NOV-", "-11-")
+    normalized_dd_mmm_yy = F.regexp_replace(normalized_dd_mmm_yy, r"-DEC-", "-12-")
 
-    day_part = F.regexp_extract(trimmed_date_text, r"^(\d{1,2})-[A-Z]{3}-(\d{2})$", 1)
-    month_part = F.regexp_extract(trimmed_date_text, r"^\d{1,2}-([A-Z]{3})-(\d{2})$", 1)
-    year_part = F.regexp_extract(trimmed_date_text, r"^\d{1,2}-[A-Z]{3}-(\d{2})$", 1)
-
-    month_map = F.create_map(
-        F.lit("JAN"), F.lit(1),
-        F.lit("FEB"), F.lit(2),
-        F.lit("MAR"), F.lit(3),
-        F.lit("APR"), F.lit(4),
-        F.lit("MAY"), F.lit(5),
-        F.lit("JUN"), F.lit(6),
-        F.lit("JUL"), F.lit(7),
-        F.lit("AUG"), F.lit(8),
-        F.lit("SEP"), F.lit(9),
-        F.lit("OCT"), F.lit(10),
-        F.lit("NOV"), F.lit(11),
-        F.lit("DEC"), F.lit(12),
-    )
-
-    parsed_dd_mmm_yy = F.when(
+    day_part = F.regexp_extract(normalized_dd_mmm_yy, r"^(\d{1,2})-(\d{2})-(\d{2})$", 1)
+    month_part = F.regexp_extract(normalized_dd_mmm_yy, r"^(\d{1,2})-(\d{2})-(\d{2})$", 2)
+    year_part = F.regexp_extract(normalized_dd_mmm_yy, r"^(\d{1,2})-(\d{2})-(\d{2})$", 3)
+    normalized_yyyy_mm_dd = F.when(
         (day_part != "") & (month_part != "") & (year_part != ""),
-        F.make_date(
-            (F.lit(2000) + year_part.cast("int")),
-            month_map[month_part],
-            day_part.cast("int"),
-        ),
+        F.concat(F.lit("20"), year_part, F.lit("-"), month_part, F.lit("-"), F.lpad(day_part, 2, "0")),
     )
 
     return F.coalesce(
         column_expression.cast("date"),
-        parsed_dd_mmm_yy,
+        F.to_date(normalized_yyyy_mm_dd, "yyyy-MM-dd"),
         F.to_date(string_value, "yyyy-MM-dd"),
         F.to_date(string_value, "M/d/yyyy"),
         F.to_date(string_value, "MM/dd/yyyy"),
