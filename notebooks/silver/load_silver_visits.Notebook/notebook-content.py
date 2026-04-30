@@ -466,27 +466,28 @@ booking_candidates_df = (
         + F.col("booking_source_value_score")
         + F.col("booked_by_value_score"),
     )
+    .withColumn("_base_row_id", F.col("b._base_row_id"))
+    .withColumn("_booking_row_id", F.col("s._booking_row_id"))
 )
 
 booking_candidate_counts_df = (
     booking_candidates_df
-    .groupBy(F.col("b._base_row_id").alias("_base_row_id"))
+    .groupBy("_base_row_id")
     .agg(F.sum(F.when(F.col("has_booking_candidate"), F.lit(1)).otherwise(F.lit(0))).alias("booking_candidate_count"))
 )
 
-booking_match_window = Window.partitionBy(F.col("b._base_row_id")).orderBy(
+booking_match_window = Window.partitionBy("_base_row_id").orderBy(
     F.col("client_id_match_score").desc(),
     F.col("client_name_match_score").desc(),
     F.col("email_match_score").desc(),
     F.col("phone_match_score").desc(),
     F.col("booking_source_match_score").desc(),
-    F.col("s._booking_row_id").asc_nulls_last(),
+    F.col("_booking_row_id").asc_nulls_last(),
 )
 
 booking_enriched_df = (
     booking_candidates_df
-    .join(booking_candidate_counts_df, F.col("b._base_row_id") == F.col("_base_row_id"), "left")
-    .drop("_base_row_id")
+    .join(booking_candidate_counts_df, ["_base_row_id"], "left")
     .withColumn("_booking_match_rank", F.row_number().over(booking_match_window))
     .filter(F.col("_booking_match_rank") == 1)
     .withColumn(
@@ -667,15 +668,16 @@ client_candidates_df = (
             + F.coalesce(F.col("c.candidate_dedupe_score"), F.lit(0)),
         ).otherwise(F.lit(-1)),
     )
+    .withColumn("_base_row_id", F.col("v._base_row_id"))
 )
 
 client_candidate_counts_df = (
     client_candidates_df
-    .groupBy(F.col("v._base_row_id").alias("_base_row_id"))
+    .groupBy("_base_row_id")
     .agg(F.sum(F.when(F.col("has_client_candidate"), F.lit(1)).otherwise(F.lit(0))).alias("client_candidate_count"))
 )
 
-client_match_window = Window.partitionBy(F.col("v._base_row_id")).orderBy(
+client_match_window = Window.partitionBy("_base_row_id").orderBy(
     F.col("has_client_candidate").desc(),
     F.col("client_match_score").desc(),
     F.col("candidate_source_client_id").asc_nulls_last(),
@@ -684,8 +686,7 @@ client_match_window = Window.partitionBy(F.col("v._base_row_id")).orderBy(
 
 fallback_client_matched_df = (
     client_candidates_df
-    .join(client_candidate_counts_df, F.col("v._base_row_id") == F.col("_base_row_id"), "left")
-    .drop("_base_row_id")
+    .join(client_candidate_counts_df, ["_base_row_id"], "left")
     .withColumn("_client_match_rank", F.row_number().over(client_match_window))
     .filter(F.col("_client_match_rank") == 1)
     .withColumn("salt_client_key", F.col("c.candidate_salt_client_key"))
