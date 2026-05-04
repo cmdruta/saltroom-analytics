@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataPipeline",
+    "displayName": "pl_full_refresh_saltroom"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "4c8248a6-114b-a133-459a-0226203dc13a"
+  }
+}

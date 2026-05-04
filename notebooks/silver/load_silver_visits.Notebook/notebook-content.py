@@ -20,7 +20,7 @@
 # META   }
 # META }
 
-# CELL ********************
+# PARAMETERS CELL ********************
 
 # Parameters
 load_mode = "init"

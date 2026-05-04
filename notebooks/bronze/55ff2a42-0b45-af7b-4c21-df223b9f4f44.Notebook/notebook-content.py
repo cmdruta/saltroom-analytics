@@ -20,11 +20,12 @@
 # META   }
 # META }
 
-# CELL ********************
+# PARAMETERS CELL ********************
 
 # Parameters
 load_mode = "init"
 batch_id = None
+entity_to_load = "all"  # Supported values: all, clients, visits, timeclock, purchases
 
 from datetime import datetime
 
@@ -71,7 +72,7 @@ CONFIG_CANDIDATE_PATHS = [
     "/lakehouse/default/Files/config/bronze_sources.json",
     "../../config/bronze_sources.json",
 ]
-ENTITY_TO_LOAD = "clients"  # Supported values: all, clients, visits, timeclock, purchases
+
 CSV_READ_OPTIONS = {
     "header": "true",
     "multiLine": "true",
@@ -80,7 +81,7 @@ CSV_READ_OPTIONS = {
     "encoding": "UTF-8",
 }
 
-VALID_LOAD_MODES = {"init", "full_refresh", "append"}
+VALID_LOAD_MODES = {"init", "refresh", "append"}
 VALID_ENTITIES = {"clients", "visits", "timeclock", "purchases"}
 
 
@@ -434,7 +435,7 @@ def run_bronze_ingestion(config: dict, selected_entities: list[str], active_load
 
 # Main execution
 
-active_entity = validate_entity(ENTITY_TO_LOAD)
+active_entity = validate_entity(entity_to_load)
 selected_entities = resolve_selected_entities(active_entity)
 active_load_mode = validate_load_mode(load_mode)
 config = load_config(CONFIG_CANDIDATE_PATHS)

@@ -20,7 +20,7 @@
 # META   }
 # META }
 
-# CELL ********************
+# PARAMETERS CELL ********************
 
 # Parameters
 load_mode = "init"
@@ -967,3 +967,10 @@ print(
     f"Purchases: {purchase_count}, Visits: {visit_count}, Timeclock: {timeclock_count}, "
     f"DQ warnings: {warning_count}."
 )
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
