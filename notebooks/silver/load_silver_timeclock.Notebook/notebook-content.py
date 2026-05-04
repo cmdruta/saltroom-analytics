@@ -60,7 +60,7 @@ from pyspark.sql import types as T
 
 # Runtime parameters
 
-LOAD_MODE = "init"  # Supported values: init, refresh
+LOAD_MODE = "refresh"  # Supported values: init, refresh
 
 BRONZE_SCHEMA = "bronze"
 SILVER_SCHEMA = "silver"
