@@ -22,11 +22,28 @@
 
 # CELL ********************
 
+# Parameters
+load_mode = "init"
+batch_id = None
+
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # Bronze data quality checks for Microsoft Fabric Lakehouse.
 # This notebook validates existing Bronze tables only. It does not transform data
 # and it does not create Silver tables.
-
-from __future__ import annotations
 
 import json
 import re

@@ -22,6 +22,25 @@
 
 # CELL ********************
 
+# Parameters
+load_mode = "init"
+batch_id = None
+
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # Silver visits load for Microsoft Fabric Lakehouse.
 #
 # Architecture note:
@@ -42,13 +61,12 @@
 # - base visits: service, date, time, staff, client, email, phone, client_id, option
 # - booking source: client, email, phone, client_id, service, date, time, staff, booking_source, booked_by
 
-from __future__ import annotations
-
 import re
 
 from pyspark.sql import DataFrame
 from pyspark.sql import Window
 from pyspark.sql import functions as F
+from pyspark.sql.functions import lit
 from pyspark.sql import types as T
 
 
@@ -62,8 +80,6 @@ from pyspark.sql import types as T
 # CELL ********************
 
 # Runtime parameters
-
-LOAD_MODE = "init"  # Supported values: init, refresh
 
 BRONZE_SCHEMA = "bronze"
 SILVER_SCHEMA = "silver"
@@ -267,7 +283,7 @@ def build_primary_dq_status() -> F.Column:
 
 # Load and validate source tables
 
-active_load_mode = validate_load_mode(LOAD_MODE)
+active_load_mode = validate_load_mode(load_mode)
 
 for required_table in [BASE_VISITS_TABLE, BOOKING_SOURCE_TABLE, SILVER_CLIENTS_TABLE]:
     if not table_exists(required_table):
@@ -898,6 +914,9 @@ display(
 # Write silver.visits
 
 ensure_schema_exists(SILVER_SCHEMA)
+
+if "batch_id" not in final_silver_visits_df.columns:
+    final_silver_visits_df = final_silver_visits_df.withColumn("batch_id", lit(batch_id))
 
 (
     final_silver_visits_df.write

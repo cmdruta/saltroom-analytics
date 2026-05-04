@@ -22,9 +22,26 @@
 
 # CELL ********************
 
-# Dependencies
+# Parameters
+load_mode = "init"
+batch_id = None
 
-from __future__ import annotations
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+# Dependencies
 
 import json
 import re
@@ -35,6 +52,7 @@ from functools import reduce
 
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
+from pyspark.sql.functions import lit
 
 
 # METADATA ********************
@@ -54,13 +72,6 @@ CONFIG_CANDIDATE_PATHS = [
     "../../config/bronze_sources.json",
 ]
 ENTITY_TO_LOAD = "clients"  # Supported values: all, clients, visits, timeclock, purchases
-ENTITY_LOAD_MODES = {
-    "clients": "full_refresh",
-    "visits": "init",
-    "timeclock": "init",
-    "purchases": "init",
-}
-
 CSV_READ_OPTIONS = {
     "header": "true",
     "multiLine": "true",
@@ -151,13 +162,6 @@ def resolve_selected_entities(entity_to_load: str) -> list[str]:
     if entity_to_load == "all":
         return ["clients", "visits", "timeclock", "purchases"]
     return [entity_to_load]
-
-
-def resolve_entity_load_modes(entity_load_modes: dict[str, str]) -> dict[str, str]:
-    return {
-        entity_name: validate_load_mode(entity_load_modes.get(entity_name, "append"))
-        for entity_name in sorted(VALID_ENTITIES)
-    }
 
 
 def read_csv(path: str, **overrides: str) -> DataFrame:
@@ -260,6 +264,8 @@ def filter_already_ingested_files(
 def write_delta_table(dataframe: DataFrame, target_table: str, load_mode: str) -> None:
     """Write a Bronze table using the requested load mode."""
     table_already_exists = table_exists(target_table)
+    if "batch_id" not in dataframe.columns:
+        dataframe = dataframe.withColumn("batch_id", lit(batch_id))
 
     if load_mode == "init":
         if table_already_exists:
@@ -274,7 +280,7 @@ def write_delta_table(dataframe: DataFrame, target_table: str, load_mode: str) -
         return
 
     if table_already_exists:
-        dataframe.write.format("delta").mode("append").saveAsTable(target_table)
+        dataframe.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(target_table)
     else:
         dataframe.write.format("delta").mode("errorifexists").saveAsTable(target_table)
 
@@ -398,24 +404,23 @@ def load_visits_dataset(dataset_config: dict, bronze_schema: str, load_mode: str
         dataframe = add_audit_columns(dataframe)
         write_delta_table(dataframe, target_table, load_mode)
 
-def run_bronze_ingestion(config: dict, selected_entities: list[str], entity_load_modes: dict[str, str]) -> None:
+def run_bronze_ingestion(config: dict, selected_entities: list[str], active_load_mode: str) -> None:
     bronze_schema = config["bronze_schema"]
     datasets = config["datasets"]
 
     ensure_bronze_schema_exists(bronze_schema)
 
     for entity_name in selected_entities:
-        load_mode = entity_load_modes[entity_name]
-        print(f"Loading entity '{entity_name}' using LOAD_MODE='{load_mode}'.")
+        print(f"Loading entity '{entity_name}' using LOAD_MODE='{active_load_mode}'.")
 
         if entity_name == "clients":
-            load_single_csv_dataset(datasets["clients"], bronze_schema, load_mode)
+            load_single_csv_dataset(datasets["clients"], bronze_schema, active_load_mode)
         elif entity_name == "visits":
-            load_visits_dataset(datasets["visits"], bronze_schema, load_mode)
+            load_visits_dataset(datasets["visits"], bronze_schema, active_load_mode)
         elif entity_name == "timeclock":
-            load_single_csv_dataset(datasets["timeclock"], bronze_schema, load_mode)
+            load_single_csv_dataset(datasets["timeclock"], bronze_schema, active_load_mode)
         elif entity_name == "purchases":
-            load_purchases_dataset(datasets["purchases"], bronze_schema, load_mode)
+            load_purchases_dataset(datasets["purchases"], bronze_schema, active_load_mode)
 
 
 # METADATA ********************
@@ -431,10 +436,10 @@ def run_bronze_ingestion(config: dict, selected_entities: list[str], entity_load
 
 active_entity = validate_entity(ENTITY_TO_LOAD)
 selected_entities = resolve_selected_entities(active_entity)
-entity_load_modes = resolve_entity_load_modes(ENTITY_LOAD_MODES)
+active_load_mode = validate_load_mode(load_mode)
 config = load_config(CONFIG_CANDIDATE_PATHS)
 
-run_bronze_ingestion(config, selected_entities, entity_load_modes)
+run_bronze_ingestion(config, selected_entities, active_load_mode)
 
 print(
     "Bronze ingestion completed successfully for "

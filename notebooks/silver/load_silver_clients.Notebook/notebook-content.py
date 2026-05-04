@@ -22,6 +22,25 @@
 
 # CELL ********************
 
+# Parameters
+load_mode = "init"
+batch_id = None
+
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # Silver clients load for Microsoft Fabric Lakehouse.
 #
 # Important project rule:
@@ -30,8 +49,6 @@
 # This is not a true MDM solution and can incorrectly merge different people who share a name.
 # The notebook surfaces that risk through duplicate counts and DQ status / notes.
 
-from __future__ import annotations
-
 import json
 import re
 from pathlib import Path
@@ -39,6 +56,7 @@ from pathlib import Path
 from pyspark.sql import DataFrame
 from pyspark.sql import Window
 from pyspark.sql import functions as F
+from pyspark.sql.functions import lit
 from pyspark.sql import types as T
 
 
@@ -53,7 +71,6 @@ from pyspark.sql import types as T
 
 # Runtime parameters
 
-LOAD_MODE = "refresh"  # Supported values: init, refresh
 BRONZE_CONFIG_CANDIDATE_PATHS = [
     "Files/config/bronze_sources.json",
     "/lakehouse/default/Files/config/bronze_sources.json",
@@ -261,7 +278,7 @@ def build_dq_notes() -> F.Column:
 
 # Load configuration and validate Bronze source
 
-active_load_mode = validate_load_mode(LOAD_MODE)
+active_load_mode = validate_load_mode(load_mode)
 bronze_config = load_config(BRONZE_CONFIG_CANDIDATE_PATHS)
 bronze_clients_config = bronze_config["datasets"]["clients"]
 
@@ -543,6 +560,9 @@ display(
 # Write silver.clients
 
 ensure_schema_exists(SILVER_SCHEMA)
+
+if "batch_id" not in silver_clients_df.columns:
+    silver_clients_df = silver_clients_df.withColumn("batch_id", lit(batch_id))
 
 (
     silver_clients_df.write

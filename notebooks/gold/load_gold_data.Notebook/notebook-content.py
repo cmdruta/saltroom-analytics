@@ -22,6 +22,25 @@
 
 # CELL ********************
 
+# Parameters
+load_mode = "init"
+batch_id = None
+
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # Gold star-schema loader for Salt Room Analytics.
 # This notebook rebuilds the Gold layer from Silver entities and writes
 # dimensions, facts, and a centralized DQ warning table.
@@ -51,8 +70,6 @@ from pyspark.sql import types as T
 # META }
 
 # CELL ********************
-
-LOAD_MODE = "init"
 
 SILVER_SCHEMA = "silver"
 GOLD_SCHEMA = "gold"
@@ -87,8 +104,8 @@ DECIMAL_18_2 = T.DecimalType(18, 2)
 
 # CELL ********************
 
-if LOAD_MODE not in VALID_LOAD_MODES:
-    raise ValueError(f"Unsupported LOAD_MODE '{LOAD_MODE}'. Expected one of: {sorted(VALID_LOAD_MODES)}")
+if load_mode not in VALID_LOAD_MODES:
+    raise ValueError(f"Unsupported LOAD_MODE '{load_mode}'. Expected one of: {sorted(VALID_LOAD_MODES)}")
 
 
 def require_table(table_name: str) -> DataFrame:

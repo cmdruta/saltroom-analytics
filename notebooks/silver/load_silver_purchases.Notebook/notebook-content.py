@@ -22,6 +22,25 @@
 
 # CELL ********************
 
+# Parameters
+load_mode = "init"
+batch_id = None
+
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # Silver purchases load for Microsoft Fabric Lakehouse.
 #
 # Architecture note:
@@ -36,14 +55,13 @@
 # full name plus email/phone support. That fallback can incorrectly merge different people
 # with the same name, so the notebook keeps explicit client match method and DQ warnings.
 
-from __future__ import annotations
-
 import re
 from decimal import Decimal
 
 from pyspark.sql import DataFrame
 from pyspark.sql import Window
 from pyspark.sql import functions as F
+from pyspark.sql.functions import lit
 from pyspark.sql import types as T
 
 
@@ -57,8 +75,6 @@ from pyspark.sql import types as T
 # CELL ********************
 
 # Runtime parameters
-
-LOAD_MODE = "init"  # Supported values: init, refresh
 
 BRONZE_SCHEMA = "bronze"
 SILVER_SCHEMA = "silver"
@@ -250,7 +266,7 @@ def build_incremental_row_fingerprint(dataframe: DataFrame) -> F.Column:
 
 # Load source tables and validate runtime assumptions
 
-active_load_mode = validate_load_mode(LOAD_MODE)
+active_load_mode = validate_load_mode(load_mode)
 
 if not table_exists(BRONZE_PURCHASES_TABLE):
     raise ValueError(
@@ -851,6 +867,9 @@ write_batch_df = final_silver_purchases_df.withColumn(
     build_incremental_row_fingerprint(final_silver_purchases_df),
 )
 
+if "batch_id" not in write_batch_df.columns:
+    write_batch_df = write_batch_df.withColumn("batch_id", lit(batch_id))
+
 rows_selected_for_write_count = write_batch_df.count()
 
 if active_load_mode == "init" or not table_exists(SILVER_PURCHASES_TABLE):
@@ -931,6 +950,7 @@ else:
             .write
             .format("delta")
             .mode("append")
+            .option("mergeSchema", "true")
             .saveAsTable(SILVER_PURCHASES_TABLE)
         )
 

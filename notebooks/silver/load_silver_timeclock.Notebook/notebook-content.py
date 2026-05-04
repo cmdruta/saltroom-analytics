@@ -22,6 +22,25 @@
 
 # CELL ********************
 
+# Parameters
+load_mode = "init"
+batch_id = None
+
+from datetime import datetime
+
+if not batch_id:
+    batch_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 # Silver timeclock load for Microsoft Fabric Lakehouse.
 #
 # Architecture note:
@@ -39,13 +58,12 @@
 # Grain:
 # One row per source timeclock row / shift entry from bronze.timeclock.
 
-from __future__ import annotations
-
 import re
 
 from pyspark.sql import DataFrame
 from pyspark.sql import Window
 from pyspark.sql import functions as F
+from pyspark.sql.functions import lit
 from pyspark.sql import types as T
 
 
@@ -59,8 +77,6 @@ from pyspark.sql import types as T
 # CELL ********************
 
 # Runtime parameters
-
-LOAD_MODE = "refresh"  # Supported values: init, refresh
 
 BRONZE_SCHEMA = "bronze"
 SILVER_SCHEMA = "silver"
@@ -211,7 +227,7 @@ def build_primary_dq_status() -> F.Column:
 
 # Load and validate Bronze source
 
-active_load_mode = validate_load_mode(LOAD_MODE)
+active_load_mode = validate_load_mode(load_mode)
 
 if not table_exists(BRONZE_TIMECLOCK_TABLE):
     raise ValueError(
@@ -403,6 +419,9 @@ display(
 # Write silver.timeclock
 
 ensure_schema_exists(SILVER_SCHEMA)
+
+if "batch_id" not in final_silver_timeclock_df.columns:
+    final_silver_timeclock_df = final_silver_timeclock_df.withColumn("batch_id", lit(batch_id))
 
 (
     final_silver_timeclock_df.write
