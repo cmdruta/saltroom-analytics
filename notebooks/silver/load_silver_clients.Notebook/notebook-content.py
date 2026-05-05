@@ -82,6 +82,9 @@ SILVER_SCHEMA = "silver"
 TARGET_TABLE = "clients"
 
 VALID_LOAD_MODES = {"init", "refresh"}
+DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
+NOTEBOOK_NAME = "load_silver_clients"
+PROCESS_NAME = "load_silver_clients"
 
 
 # METADATA ********************
@@ -202,6 +205,105 @@ def ensure_schema_exists(schema_name: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
 
 
+def _sample_record(dataframe: DataFrame, condition, columns: list[str] | None = None) -> dict | None:
+    sample_df = dataframe.filter(condition)
+    if columns:
+        sample_df = sample_df.select(*[column_name for column_name in columns if column_name in sample_df.columns])
+    rows = sample_df.limit(1).collect()
+    return rows[0].asDict(recursive=True) if rows else None
+
+
+def write_dq_result(
+    batch_id: str,
+    layer: str,
+    notebook_name: str,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    severity: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+    status: str = "WARN",
+) -> None:
+    if not batch_id:
+        raise ValueError("batch_id parameter is required before writing DQ results.")
+
+    ensure_schema_exists("dq")
+    sample_record_json = json.dumps(sample_record, default=str) if sample_record else None
+    schema = T.StructType([
+        T.StructField("batch_id", T.StringType(), False),
+        T.StructField("layer", T.StringType(), False),
+        T.StructField("notebook_name", T.StringType(), False),
+        T.StructField("process_name", T.StringType(), False),
+        T.StructField("target_table", T.StringType(), False),
+        T.StructField("check_name", T.StringType(), False),
+        T.StructField("severity", T.StringType(), False),
+        T.StructField("warning_code", T.StringType(), False),
+        T.StructField("warning_message", T.StringType(), False),
+        T.StructField("affected_row_count", T.LongType(), False),
+        T.StructField("sample_record", T.StringType(), True),
+        T.StructField("status", T.StringType(), False),
+    ])
+    result_df = spark.createDataFrame(
+        [(
+            str(batch_id),
+            layer,
+            notebook_name,
+            process_name,
+            target_table,
+            check_name,
+            severity,
+            warning_code,
+            warning_message,
+            int(affected_row_count or 0),
+            sample_record_json,
+            status,
+        )],
+        schema,
+    ).withColumn("generated_at", F.current_timestamp()).select(
+        "batch_id",
+        "generated_at",
+        "layer",
+        "notebook_name",
+        "process_name",
+        "target_table",
+        "check_name",
+        "severity",
+        "warning_code",
+        "warning_message",
+        "affected_row_count",
+        "sample_record",
+        "status",
+    )
+    result_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(DQ_LOAD_WARNINGS_TABLE)
+
+
+def write_dq_warning(
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+) -> None:
+    if affected_row_count > 0:
+        write_dq_result(
+            batch_id,
+            "silver",
+            NOTEBOOK_NAME,
+            PROCESS_NAME,
+            silver_clients_table,
+            check_name,
+            "WARNING",
+            warning_code,
+            warning_message,
+            affected_row_count,
+            sample_record,
+            "WARN",
+        )
+
+
 def first_matching_column(columns: list[str], candidate_names: list[str]) -> str | None:
     available_columns = {column_name.lower(): column_name for column_name in columns}
 
@@ -286,6 +388,20 @@ bronze_clients_table = f"{BRONZE_SCHEMA}.{bronze_clients_config['target_table']}
 silver_clients_table = f"{SILVER_SCHEMA}.{TARGET_TABLE}"
 
 if not table_exists(bronze_clients_table):
+    write_dq_result(
+        batch_id,
+        "silver",
+        NOTEBOOK_NAME,
+        PROCESS_NAME,
+        silver_clients_table,
+        "required_bronze_table_missing",
+        "ERROR",
+        "SILVER_CLIENTS_REQUIRED_BRONZE_TABLE_MISSING",
+        f"Required Bronze table {bronze_clients_table} does not exist.",
+        0,
+        {"required_table": bronze_clients_table},
+        "FAIL",
+    )
     raise ValueError(
         f"Required Bronze table {bronze_clients_table} does not exist. "
         "Run the Bronze clients ingestion notebook before loading Silver clients."
@@ -538,6 +654,49 @@ dq_summary_rows = [
 ]
 
 dq_summary_df = spark.createDataFrame(dq_summary_rows, ["metric_name", "metric_value"])
+
+write_dq_warning(
+    "blank_client_name_removed",
+    "SILVER_CLIENTS_BLANK_NAME_REMOVED",
+    "Rows with blank normalized client names were removed from silver.clients.",
+    rows_removed_blank_name,
+    _sample_record(prepared_clients_df, F.col("client").isNull()),
+)
+write_dq_warning(
+    "duplicate_normalized_client_name",
+    "SILVER_CLIENTS_DUPLICATE_NORMALIZED_NAME",
+    "Multiple Bronze client rows shared the same normalized client name and were merged into one Silver record.",
+    rows_where_dedupe_chose_among_duplicates,
+    _sample_record(silver_clients_df, F.col("duplicate_name_count") > 1),
+)
+write_dq_warning(
+    "missing_email",
+    "SILVER_CLIENTS_MISSING_EMAIL",
+    "Silver client rows are missing email.",
+    rows_missing_email,
+    _sample_record(silver_clients_df, F.col("email_clean").isNull()),
+)
+write_dq_warning(
+    "missing_phone",
+    "SILVER_CLIENTS_MISSING_PHONE",
+    "Silver client rows are missing phone.",
+    rows_missing_phone,
+    _sample_record(silver_clients_df, F.col("phone_clean").isNull()),
+)
+write_dq_warning(
+    "missing_source_client_id",
+    "SILVER_CLIENTS_MISSING_SOURCE_CLIENT_ID",
+    "Silver client rows are missing source client id.",
+    rows_missing_source_client_id,
+    _sample_record(silver_clients_df, F.col("source_client_id").isNull()),
+)
+write_dq_warning(
+    "missing_source_member_id",
+    "SILVER_CLIENTS_MISSING_SOURCE_MEMBER_ID",
+    "Silver client rows are missing source member id.",
+    rows_missing_source_member_id,
+    _sample_record(silver_clients_df, F.col("source_member_id").isNull()),
+)
 
 display(dq_summary_df)
 display(

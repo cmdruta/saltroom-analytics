@@ -58,6 +58,7 @@ if not batch_id:
 # Grain:
 # One row per source timeclock row / shift entry from bronze.timeclock.
 
+import json
 import re
 
 from pyspark.sql import DataFrame
@@ -84,6 +85,9 @@ BRONZE_TIMECLOCK_TABLE = f"{BRONZE_SCHEMA}.timeclock"
 SILVER_TIMECLOCK_TABLE = f"{SILVER_SCHEMA}.timeclock"
 
 VALID_LOAD_MODES = {"init", "refresh"}
+DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
+NOTEBOOK_NAME = "load_silver_timeclock"
+PROCESS_NAME = "load_silver_timeclock"
 
 
 # METADATA ********************
@@ -110,6 +114,105 @@ def table_exists(table_name: str) -> bool:
 
 def ensure_schema_exists(schema_name: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+
+
+def _sample_record(dataframe: DataFrame, condition, columns: list[str] | None = None) -> dict | None:
+    sample_df = dataframe.filter(condition)
+    if columns:
+        sample_df = sample_df.select(*[column_name for column_name in columns if column_name in sample_df.columns])
+    rows = sample_df.limit(1).collect()
+    return rows[0].asDict(recursive=True) if rows else None
+
+
+def write_dq_result(
+    batch_id: str,
+    layer: str,
+    notebook_name: str,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    severity: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+    status: str = "WARN",
+) -> None:
+    if not batch_id:
+        raise ValueError("batch_id parameter is required before writing DQ results.")
+
+    ensure_schema_exists("dq")
+    sample_record_json = json.dumps(sample_record, default=str) if sample_record else None
+    schema = T.StructType([
+        T.StructField("batch_id", T.StringType(), False),
+        T.StructField("layer", T.StringType(), False),
+        T.StructField("notebook_name", T.StringType(), False),
+        T.StructField("process_name", T.StringType(), False),
+        T.StructField("target_table", T.StringType(), False),
+        T.StructField("check_name", T.StringType(), False),
+        T.StructField("severity", T.StringType(), False),
+        T.StructField("warning_code", T.StringType(), False),
+        T.StructField("warning_message", T.StringType(), False),
+        T.StructField("affected_row_count", T.LongType(), False),
+        T.StructField("sample_record", T.StringType(), True),
+        T.StructField("status", T.StringType(), False),
+    ])
+    result_df = spark.createDataFrame(
+        [(
+            str(batch_id),
+            layer,
+            notebook_name,
+            process_name,
+            target_table,
+            check_name,
+            severity,
+            warning_code,
+            warning_message,
+            int(affected_row_count or 0),
+            sample_record_json,
+            status,
+        )],
+        schema,
+    ).withColumn("generated_at", F.current_timestamp()).select(
+        "batch_id",
+        "generated_at",
+        "layer",
+        "notebook_name",
+        "process_name",
+        "target_table",
+        "check_name",
+        "severity",
+        "warning_code",
+        "warning_message",
+        "affected_row_count",
+        "sample_record",
+        "status",
+    )
+    result_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(DQ_LOAD_WARNINGS_TABLE)
+
+
+def write_dq_warning(
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+) -> None:
+    if affected_row_count > 0:
+        write_dq_result(
+            batch_id,
+            "silver",
+            NOTEBOOK_NAME,
+            PROCESS_NAME,
+            SILVER_TIMECLOCK_TABLE,
+            check_name,
+            "WARNING",
+            warning_code,
+            warning_message,
+            affected_row_count,
+            sample_record,
+            "WARN",
+        )
 
 
 def normalize_column_name(column_name: str) -> str:
@@ -230,6 +333,20 @@ def build_primary_dq_status() -> F.Column:
 active_load_mode = validate_load_mode(load_mode)
 
 if not table_exists(BRONZE_TIMECLOCK_TABLE):
+    write_dq_result(
+        batch_id,
+        "silver",
+        NOTEBOOK_NAME,
+        PROCESS_NAME,
+        SILVER_TIMECLOCK_TABLE,
+        "required_bronze_table_missing",
+        "ERROR",
+        "SILVER_TIMECLOCK_REQUIRED_BRONZE_TABLE_MISSING",
+        f"Required Bronze table {BRONZE_TIMECLOCK_TABLE} does not exist.",
+        0,
+        {"required_table": BRONZE_TIMECLOCK_TABLE},
+        "FAIL",
+    )
     raise ValueError(
         f"Required Bronze table {BRONZE_TIMECLOCK_TABLE} does not exist. "
         "Run the Bronze timeclock ingestion notebook before loading Silver timeclock."
@@ -399,6 +516,63 @@ dq_summary_rows = [
     for metric_name in summary_metric_order
 ]
 dq_summary_df = spark.createDataFrame(dq_summary_rows, ["metric_name", "metric_value"])
+
+write_dq_warning(
+    "missing_staff_member",
+    "SILVER_TIMECLOCK_MISSING_STAFF_MEMBER",
+    "Source timeclock rows were missing staff member and excluded before Silver output.",
+    rows_missing_staff_member,
+    None,
+)
+write_dq_warning(
+    "missing_work_date",
+    "SILVER_TIMECLOCK_MISSING_WORK_DATE",
+    "Silver timeclock rows are missing work date.",
+    dq_summary_row["rows_missing_work_date"],
+    _sample_record(timeclock_work_df, F.col("work_date_raw").isNull()),
+)
+write_dq_warning(
+    "failed_date_parsing",
+    "SILVER_TIMECLOCK_FAILED_DATE_PARSING",
+    "Silver timeclock rows had work date values that could not be parsed.",
+    dq_summary_row["rows_with_failed_date_parsing"],
+    _sample_record(timeclock_work_df, F.col("work_date_raw").isNotNull() & F.col("work_date").isNull()),
+)
+write_dq_warning(
+    "missing_hours",
+    "SILVER_TIMECLOCK_MISSING_HOURS",
+    "Silver timeclock rows are missing hours.",
+    dq_summary_row["rows_missing_hours"],
+    _sample_record(timeclock_work_df, F.col("hours_raw").isNull()),
+)
+write_dq_warning(
+    "failed_hours_parsing",
+    "SILVER_TIMECLOCK_FAILED_HOURS_PARSING",
+    "Silver timeclock rows had hours values that could not be parsed.",
+    dq_summary_row["rows_with_failed_hours_parsing"],
+    _sample_record(timeclock_work_df, F.col("hours_raw").isNotNull() & F.col("hours_worked_original").isNull()),
+)
+write_dq_warning(
+    "zero_or_negative_hours",
+    "SILVER_TIMECLOCK_ZERO_OR_NEGATIVE_HOURS",
+    "Silver timeclock rows had zero or negative hours.",
+    dq_summary_row["rows_with_zero_or_negative_hours"],
+    _sample_record(timeclock_work_df, F.col("hours_worked_original") <= F.lit(0).cast(T.DecimalType(10, 4))),
+)
+write_dq_warning(
+    "hours_greater_than_12_adjusted",
+    "SILVER_TIMECLOCK_HOURS_GT_12_ADJUSTED",
+    "Hours greater than 12 were assumed to be bad clock-out records and adjusted to 5.",
+    dq_summary_row["rows_with_hours_greater_than_12_defaulted_to_5"],
+    _sample_record(timeclock_work_df, F.col("hours_defaulted_missed_clockout")),
+)
+write_dq_warning(
+    "duplicate_salt_timeclock_key",
+    "SILVER_TIMECLOCK_DUPLICATE_SALT_TIMECLOCK_KEY",
+    "Silver timeclock rows have duplicate salt_timeclock_key values.",
+    dq_summary_row["duplicate_salt_timeclock_key_count"],
+    _sample_record(timeclock_work_df, F.col("duplicate_salt_timeclock_key_count") > 1),
+)
 
 display(dq_summary_df)
 display(

@@ -55,6 +55,7 @@ if not batch_id:
 # full name plus email/phone support. That fallback can incorrectly merge different people
 # with the same name, so the notebook keeps explicit client match method and DQ warnings.
 
+import json
 import re
 from decimal import Decimal
 
@@ -84,6 +85,9 @@ SILVER_PURCHASES_TABLE = f"{SILVER_SCHEMA}.purchases"
 
 VALID_LOAD_MODES = {"init", "refresh"}
 AMOUNT_TOLERANCE = Decimal("0.05")
+DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
+NOTEBOOK_NAME = "load_silver_purchases"
+PROCESS_NAME = "load_silver_purchases"
 
 
 # METADATA ********************
@@ -110,6 +114,105 @@ def table_exists(table_name: str) -> bool:
 
 def ensure_schema_exists(schema_name: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+
+
+def _sample_record(dataframe: DataFrame, condition, columns: list[str] | None = None) -> dict | None:
+    sample_df = dataframe.filter(condition)
+    if columns:
+        sample_df = sample_df.select(*[column_name for column_name in columns if column_name in sample_df.columns])
+    rows = sample_df.limit(1).collect()
+    return rows[0].asDict(recursive=True) if rows else None
+
+
+def write_dq_result(
+    batch_id: str,
+    layer: str,
+    notebook_name: str,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    severity: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+    status: str = "WARN",
+) -> None:
+    if not batch_id:
+        raise ValueError("batch_id parameter is required before writing DQ results.")
+
+    ensure_schema_exists("dq")
+    sample_record_json = json.dumps(sample_record, default=str) if sample_record else None
+    schema = T.StructType([
+        T.StructField("batch_id", T.StringType(), False),
+        T.StructField("layer", T.StringType(), False),
+        T.StructField("notebook_name", T.StringType(), False),
+        T.StructField("process_name", T.StringType(), False),
+        T.StructField("target_table", T.StringType(), False),
+        T.StructField("check_name", T.StringType(), False),
+        T.StructField("severity", T.StringType(), False),
+        T.StructField("warning_code", T.StringType(), False),
+        T.StructField("warning_message", T.StringType(), False),
+        T.StructField("affected_row_count", T.LongType(), False),
+        T.StructField("sample_record", T.StringType(), True),
+        T.StructField("status", T.StringType(), False),
+    ])
+    result_df = spark.createDataFrame(
+        [(
+            str(batch_id),
+            layer,
+            notebook_name,
+            process_name,
+            target_table,
+            check_name,
+            severity,
+            warning_code,
+            warning_message,
+            int(affected_row_count or 0),
+            sample_record_json,
+            status,
+        )],
+        schema,
+    ).withColumn("generated_at", F.current_timestamp()).select(
+        "batch_id",
+        "generated_at",
+        "layer",
+        "notebook_name",
+        "process_name",
+        "target_table",
+        "check_name",
+        "severity",
+        "warning_code",
+        "warning_message",
+        "affected_row_count",
+        "sample_record",
+        "status",
+    )
+    result_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(DQ_LOAD_WARNINGS_TABLE)
+
+
+def write_dq_warning(
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+) -> None:
+    if affected_row_count > 0:
+        write_dq_result(
+            batch_id,
+            "silver",
+            NOTEBOOK_NAME,
+            PROCESS_NAME,
+            SILVER_PURCHASES_TABLE,
+            check_name,
+            "WARNING",
+            warning_code,
+            warning_message,
+            affected_row_count,
+            sample_record,
+            "WARN",
+        )
 
 
 def normalize_column_name(column_name: str) -> str:
@@ -269,12 +372,40 @@ def build_incremental_row_fingerprint(dataframe: DataFrame) -> F.Column:
 active_load_mode = validate_load_mode(load_mode)
 
 if not table_exists(BRONZE_PURCHASES_TABLE):
+    write_dq_result(
+        batch_id,
+        "silver",
+        NOTEBOOK_NAME,
+        PROCESS_NAME,
+        SILVER_PURCHASES_TABLE,
+        "required_bronze_table_missing",
+        "ERROR",
+        "SILVER_PURCHASES_REQUIRED_BRONZE_TABLE_MISSING",
+        f"Required Bronze table {BRONZE_PURCHASES_TABLE} does not exist.",
+        0,
+        {"required_table": BRONZE_PURCHASES_TABLE},
+        "FAIL",
+    )
     raise ValueError(
         f"Required Bronze table {BRONZE_PURCHASES_TABLE} does not exist. "
         "Run the Bronze purchases ingestion notebook before loading Silver purchases."
     )
 
 if not table_exists(SILVER_CLIENTS_TABLE):
+    write_dq_result(
+        batch_id,
+        "silver",
+        NOTEBOOK_NAME,
+        PROCESS_NAME,
+        SILVER_PURCHASES_TABLE,
+        "required_silver_clients_table_missing",
+        "ERROR",
+        "SILVER_PURCHASES_REQUIRED_SILVER_CLIENTS_TABLE_MISSING",
+        f"Required Silver table {SILVER_CLIENTS_TABLE} does not exist.",
+        0,
+        {"required_table": SILVER_CLIENTS_TABLE},
+        "FAIL",
+    )
     raise ValueError(
         f"Required Silver table {SILVER_CLIENTS_TABLE} does not exist. "
         "Run the Silver clients notebook before loading Silver purchases."
@@ -822,6 +953,70 @@ dq_summary_rows = [
 ]
 
 dq_summary_df = spark.createDataFrame(dq_summary_rows, ["metric_name", "metric_value"])
+
+write_dq_warning(
+    "duplicate_source_purchase_item_id",
+    "SILVER_PURCHASES_DUPLICATE_SOURCE_PURCHASE_ITEM_ID",
+    "Multiple purchase rows share the same source_purchase_item_id.",
+    dq_summary_row["duplicate_source_purchase_item_id_count"],
+    _sample_record(enriched_purchases_df, F.col("source_purchase_item_id").isNotNull() & (F.col("source_purchase_item_id_count") > 1)),
+)
+write_dq_warning(
+    "missing_source_purchase_item_id",
+    "SILVER_PURCHASES_MISSING_SOURCE_PURCHASE_ITEM_ID",
+    "Purchase rows are missing source_purchase_item_id.",
+    dq_summary_row["rows_missing_source_purchase_item_id"],
+    _sample_record(enriched_purchases_df, F.col("source_purchase_item_id").isNull()),
+)
+write_dq_warning(
+    "missing_member_id",
+    "SILVER_PURCHASES_MISSING_MEMBER_ID",
+    "Purchase rows are missing source member id.",
+    dq_summary_row["rows_missing_member_id"],
+    _sample_record(enriched_purchases_df, F.col("source_member_id").isNull()),
+)
+write_dq_warning(
+    "unmatched_client",
+    "SILVER_PURCHASES_UNMATCHED_CLIENT",
+    "Purchase rows could not be matched to silver.clients.",
+    dq_summary_row["rows_unmatched_to_clients"],
+    _sample_record(enriched_purchases_df, F.col("client_match_method") == "unmatched"),
+)
+write_dq_warning(
+    "multiple_client_matches_resolved",
+    "SILVER_PURCHASES_MULTIPLE_CLIENT_MATCHES_RESOLVED",
+    "Multiple client matches were resolved to one candidate.",
+    dq_summary_row["rows_with_multiple_client_matches_resolved"],
+    _sample_record(enriched_purchases_df, F.col("has_multiple_client_matches_resolved")),
+)
+write_dq_warning(
+    "revenue_category_cleanup",
+    "SILVER_PURCHASES_REVENUE_CATEGORY_CLEANUP",
+    "Revenue category was cleaned from item/category rules.",
+    dq_summary_row["rows_with_multi_value_revenue_category_cleanup"],
+    _sample_record(enriched_purchases_df, F.col("has_revenue_category_cleanup_warning")),
+)
+write_dq_warning(
+    "tax_amount_defaulted_to_zero",
+    "SILVER_PURCHASES_TAX_AMOUNT_DEFAULTED_TO_ZERO",
+    "Missing tax amounts were defaulted to zero.",
+    dq_summary_row["rows_with_tax_amount_defaulted_to_zero"],
+    _sample_record(enriched_purchases_df, F.col("has_tax_defaulted_to_zero")),
+)
+write_dq_warning(
+    "negative_total_paid_amount",
+    "SILVER_PURCHASES_NEGATIVE_TOTAL_PAID_AMOUNT",
+    "Purchase rows have negative total paid amount.",
+    dq_summary_row["rows_with_negative_total_paid_amount"],
+    _sample_record(enriched_purchases_df, F.col("has_negative_total_paid_amount")),
+)
+write_dq_warning(
+    "amount_reconciliation_warning",
+    "SILVER_PURCHASES_AMOUNT_RECONCILIATION_WARNING",
+    "Purchase row total_paid_amount differs from net_sales_amount + tax_amount + account_change_amount.",
+    dq_summary_row["rows_with_amount_reconciliation_warnings"],
+    _sample_record(enriched_purchases_df, F.col("has_amount_reconciliation_warning")),
+)
 
 display(dq_summary_df)
 display(

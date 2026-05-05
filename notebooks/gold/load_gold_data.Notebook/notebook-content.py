@@ -56,6 +56,7 @@ if not batch_id:
 # CELL ********************
 
 from functools import reduce
+import json
 
 from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
@@ -89,6 +90,8 @@ FACT_PURCHASE_TABLE = f"{GOLD_SCHEMA}.fact_purchase"
 FACT_VISIT_TABLE = f"{GOLD_SCHEMA}.fact_visit"
 FACT_TIMECLOCK_TABLE = f"{GOLD_SCHEMA}.fact_timeclock"
 GOLD_DQ_WARNINGS_TABLE = f"{GOLD_SCHEMA}.gold_dq_warnings"
+DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
+NOTEBOOK_NAME = "load_gold_data"
 
 VALID_LOAD_MODES = {"init", "overwrite"}
 CURRENT_TIMESTAMP_UTC = F.current_timestamp()
@@ -171,6 +174,135 @@ def create_warning_df(
 
 def write_delta_table(dataframe: DataFrame, table_name: str) -> None:
     dataframe.write.mode("overwrite").format("delta").option("overwriteSchema", "true").saveAsTable(table_name)
+
+
+def ensure_schema_exists(schema_name: str) -> None:
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+
+
+def write_dq_result(
+    batch_id: str,
+    layer: str,
+    notebook_name: str,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    severity: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+    status: str = "WARN",
+) -> None:
+    if not batch_id:
+        raise ValueError("batch_id parameter is required before writing DQ results.")
+
+    ensure_schema_exists("dq")
+    sample_record_json = json.dumps(sample_record, default=str) if sample_record else None
+    schema = T.StructType([
+        T.StructField("batch_id", T.StringType(), False),
+        T.StructField("layer", T.StringType(), False),
+        T.StructField("notebook_name", T.StringType(), False),
+        T.StructField("process_name", T.StringType(), False),
+        T.StructField("target_table", T.StringType(), False),
+        T.StructField("check_name", T.StringType(), False),
+        T.StructField("severity", T.StringType(), False),
+        T.StructField("warning_code", T.StringType(), False),
+        T.StructField("warning_message", T.StringType(), False),
+        T.StructField("affected_row_count", T.LongType(), False),
+        T.StructField("sample_record", T.StringType(), True),
+        T.StructField("status", T.StringType(), False),
+    ])
+    result_df = spark.createDataFrame(
+        [(
+            str(batch_id),
+            layer,
+            notebook_name,
+            process_name,
+            target_table,
+            check_name,
+            severity,
+            warning_code,
+            warning_message,
+            int(affected_row_count or 0),
+            sample_record_json,
+            status,
+        )],
+        schema,
+    ).withColumn("generated_at", F.current_timestamp()).select(
+        "batch_id",
+        "generated_at",
+        "layer",
+        "notebook_name",
+        "process_name",
+        "target_table",
+        "check_name",
+        "severity",
+        "warning_code",
+        "warning_message",
+        "affected_row_count",
+        "sample_record",
+        "status",
+    )
+    result_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(DQ_LOAD_WARNINGS_TABLE)
+
+
+def write_dq_warning_from_dataframe(
+    warning_dataframe: DataFrame,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    status: str = "WARN",
+) -> None:
+    affected_row_count = warning_dataframe.count()
+    if affected_row_count == 0:
+        return
+
+    sample_rows = warning_dataframe.limit(1).collect()
+    sample_record = sample_rows[0].asDict(recursive=True) if sample_rows else None
+    severity = "ERROR" if status == "FAIL" else "WARNING"
+    write_dq_result(
+        batch_id,
+        "gold",
+        NOTEBOOK_NAME,
+        process_name,
+        target_table,
+        check_name,
+        severity,
+        warning_code,
+        warning_message,
+        affected_row_count,
+        sample_record,
+        status,
+    )
+
+
+def write_dq_warning(
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+) -> None:
+    if affected_row_count > 0:
+        write_dq_result(
+            batch_id,
+            "gold",
+            NOTEBOOK_NAME,
+            process_name,
+            target_table,
+            check_name,
+            "WARNING",
+            warning_code,
+            warning_message,
+            affected_row_count,
+            sample_record,
+            "WARN",
+        )
 
 
 def is_self_booked_expression(booked_by_column: str = "booked_by_name_key", booking_source_column: str = "booking_source_key") -> F.Column:
@@ -879,6 +1011,32 @@ warning_frames = [
     timeclock_invalid_date_warnings_df,
     timeclock_staff_warnings_df,
 ]
+
+gold_dq_check_specs = [
+    (purchase_invalid_date_warnings_df, "load_gold_fact_purchase", FACT_PURCHASE_TABLE, "invalid_purchase_date", "GOLD_FACT_PURCHASE_INVALID_PURCHASE_DATE", "Purchase rows were excluded from fact_purchase because purchase_date is null or invalid.", "FAIL"),
+    (purchase_client_warnings_df, "load_gold_fact_purchase", FACT_PURCHASE_TABLE, "unknown_client_key", "GOLD_FACT_PURCHASE_UNKNOWN_CLIENT_KEY", "Purchase rows used client_key = 0 because the client could not be resolved from silver.clients.", "WARN"),
+    (purchase_item_warnings_df, "load_gold_fact_purchase", FACT_PURCHASE_TABLE, "unknown_purchase_item_key", "GOLD_FACT_PURCHASE_UNKNOWN_PURCHASE_ITEM_KEY", "Purchase rows used purchase_item_key = 0 because the purchase item could not be resolved.", "WARN"),
+    (purchase_staff_warnings_df, "load_gold_fact_purchase", FACT_PURCHASE_TABLE, "unknown_sold_by_staff_key", "GOLD_FACT_PURCHASE_UNKNOWN_SOLD_BY_STAFF_KEY", "Purchase rows used sold_by_staff_key = 0 because the sold_by staff name could not be resolved.", "WARN"),
+    (visit_invalid_date_warnings_df, "load_gold_fact_visit", FACT_VISIT_TABLE, "invalid_visit_date", "GOLD_FACT_VISIT_INVALID_VISIT_DATE", "Visit rows were excluded from fact_visit because visit_date is null or invalid.", "FAIL"),
+    (visit_client_warnings_df, "load_gold_fact_visit", FACT_VISIT_TABLE, "unknown_client_key", "GOLD_FACT_VISIT_UNKNOWN_CLIENT_KEY", "Visit rows used client_key = 0 because the client could not be resolved from silver.clients.", "WARN"),
+    (visit_service_warnings_df, "load_gold_fact_visit", FACT_VISIT_TABLE, "unknown_service_key", "GOLD_FACT_VISIT_UNKNOWN_SERVICE_KEY", "Visit rows used service_key = 0 because the service could not be resolved.", "WARN"),
+    (visit_purchase_item_warnings_df, "load_gold_fact_visit", FACT_VISIT_TABLE, "unknown_purchase_item_key", "GOLD_FACT_VISIT_UNKNOWN_PURCHASE_ITEM_KEY", "Visit rows used purchase_item_key = 0 because the visit option could not be resolved.", "WARN"),
+    (visit_staff_warnings_df, "load_gold_fact_visit", FACT_VISIT_TABLE, "unknown_staff_key", "GOLD_FACT_VISIT_UNKNOWN_STAFF_KEY", "Visit rows used staff_key = 0 because the visit staff name could not be resolved.", "WARN"),
+    (visit_booked_by_warnings_df, "load_gold_fact_visit", FACT_VISIT_TABLE, "unknown_booked_by_staff_key", "GOLD_FACT_VISIT_UNKNOWN_BOOKED_BY_STAFF_KEY", "Visit rows used booked_by_staff_key = 0 because booked_by should map to a real staff member but could not be resolved.", "WARN"),
+    (timeclock_invalid_date_warnings_df, "load_gold_fact_timeclock", FACT_TIMECLOCK_TABLE, "invalid_work_date", "GOLD_FACT_TIMECLOCK_INVALID_WORK_DATE", "Timeclock rows were excluded from fact_timeclock because work_date is null or invalid.", "FAIL"),
+    (timeclock_staff_warnings_df, "load_gold_fact_timeclock", FACT_TIMECLOCK_TABLE, "unknown_staff_key", "GOLD_FACT_TIMECLOCK_UNKNOWN_STAFF_KEY", "Timeclock rows used staff_key = 0 because the staff name could not be resolved.", "WARN"),
+]
+
+for warning_dataframe, process_name, target_table, check_name, warning_code, warning_message, status in gold_dq_check_specs:
+    write_dq_warning_from_dataframe(
+        warning_dataframe,
+        process_name,
+        target_table,
+        check_name,
+        warning_code,
+        warning_message,
+        status,
+    )
 
 gold_dq_warnings_stage_df = union_all(warning_frames)
 gold_dq_warnings_df = add_surrogate_key(

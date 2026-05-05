@@ -54,6 +54,7 @@ from functools import reduce
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.functions import lit
+from pyspark.sql import types as T
 
 
 # METADATA ********************
@@ -83,6 +84,8 @@ CSV_READ_OPTIONS = {
 
 VALID_LOAD_MODES = {"init", "refresh", "append"}
 VALID_ENTITIES = {"clients", "visits", "timeclock", "purchases"}
+DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
+NOTEBOOK_NAME = "load_bronze"
 
 
 # METADATA ********************
@@ -270,13 +273,27 @@ def write_delta_table(dataframe: DataFrame, target_table: str, load_mode: str) -
 
     if load_mode == "init":
         if table_already_exists:
+            write_dq_result(
+                batch_id,
+                "bronze",
+                NOTEBOOK_NAME,
+                f"load_bronze_{target_table.split('.')[-1]}",
+                target_table,
+                "target_table_exists_for_init",
+                "ERROR",
+                "BRONZE_TARGET_TABLE_EXISTS_FOR_INIT",
+                f"Target table {target_table} already exists while load_mode is init.",
+                1,
+                {"target_table": target_table, "load_mode": load_mode},
+                "FAIL",
+            )
             raise ValueError(
-                f"Target table {target_table} already exists. Use LOAD_MODE='full_refresh' or 'append'."
+                f"Target table {target_table} already exists. Use LOAD_MODE='refresh' or 'append'."
             )
         dataframe.write.format("delta").mode("errorifexists").saveAsTable(target_table)
         return
 
-    if load_mode == "full_refresh":
+    if load_mode == "refresh":
         dataframe.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable(target_table)
         return
 
@@ -293,6 +310,20 @@ def align_to_reference_schema(dataframe: DataFrame, reference_columns: list[str]
     unexpected_columns = sorted(set(dataframe_columns) - set(reference_columns))
 
     if missing_columns or unexpected_columns:
+        write_dq_result(
+            batch_id,
+            "bronze",
+            NOTEBOOK_NAME,
+            "load_bronze_purchases",
+            "bronze.purchases",
+            "purchase_file_schema_mismatch",
+            "ERROR",
+            "BRONZE_PURCHASE_FILE_SCHEMA_MISMATCH",
+            "Purchase files do not share the same normalized schema.",
+            1,
+            {"missing_columns": missing_columns, "unexpected_columns": unexpected_columns},
+            "FAIL",
+        )
         raise ValueError(
             "Purchase files do not share the same normalized schema. "
             f"Missing columns: {missing_columns}. Unexpected columns: {unexpected_columns}."
@@ -311,6 +342,103 @@ def build_target_table_name(bronze_schema: str, target_table: str) -> str:
 
 def ensure_bronze_schema_exists(bronze_schema: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {bronze_schema}")
+
+
+def ensure_dq_schema_exists() -> None:
+    spark.sql("CREATE SCHEMA IF NOT EXISTS dq")
+
+
+def write_dq_result(
+    batch_id: str,
+    layer: str,
+    notebook_name: str,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    severity: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+    status: str = "WARN",
+) -> None:
+    if not batch_id:
+        raise ValueError("batch_id parameter is required before writing DQ results.")
+
+    ensure_dq_schema_exists()
+    sample_record_json = json.dumps(sample_record, default=str) if sample_record else None
+    schema = T.StructType([
+        T.StructField("batch_id", T.StringType(), False),
+        T.StructField("layer", T.StringType(), False),
+        T.StructField("notebook_name", T.StringType(), False),
+        T.StructField("process_name", T.StringType(), False),
+        T.StructField("target_table", T.StringType(), False),
+        T.StructField("check_name", T.StringType(), False),
+        T.StructField("severity", T.StringType(), False),
+        T.StructField("warning_code", T.StringType(), False),
+        T.StructField("warning_message", T.StringType(), False),
+        T.StructField("affected_row_count", T.LongType(), False),
+        T.StructField("sample_record", T.StringType(), True),
+        T.StructField("status", T.StringType(), False),
+    ])
+    result_df = spark.createDataFrame(
+        [(
+            str(batch_id),
+            layer,
+            notebook_name,
+            process_name,
+            target_table,
+            check_name,
+            severity,
+            warning_code,
+            warning_message,
+            int(affected_row_count or 0),
+            sample_record_json,
+            status,
+        )],
+        schema,
+    ).withColumn("generated_at", F.current_timestamp()).select(
+        "batch_id",
+        "generated_at",
+        "layer",
+        "notebook_name",
+        "process_name",
+        "target_table",
+        "check_name",
+        "severity",
+        "warning_code",
+        "warning_message",
+        "affected_row_count",
+        "sample_record",
+        "status",
+    )
+    result_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(DQ_LOAD_WARNINGS_TABLE)
+
+
+def write_dq_warning(
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+) -> None:
+    if affected_row_count > 0:
+        write_dq_result(
+            batch_id,
+            "bronze",
+            NOTEBOOK_NAME,
+            process_name,
+            target_table,
+            check_name,
+            "WARNING",
+            warning_code,
+            warning_message,
+            affected_row_count,
+            sample_record,
+            "WARN",
+        )
 
 
 def get_matching_source_files(dataframe: DataFrame, file_name_filter: str | None = None) -> list[str]:
@@ -358,6 +486,20 @@ def load_purchases_dataset(dataset_config: dict, bronze_schema: str, load_mode: 
     matching_files = get_matching_source_files(raw_dataframe, file_name_filter)
 
     if not matching_files:
+        write_dq_result(
+            batch_id,
+            "bronze",
+            NOTEBOOK_NAME,
+            "load_bronze_purchases",
+            target_table,
+            "no_purchase_files_matched",
+            "ERROR",
+            "BRONZE_PURCHASES_NO_FILES_MATCHED",
+            "No purchase files matched the configured path.",
+            0,
+            {"path": file_pattern, "file_name_filter": file_name_filter},
+            "FAIL",
+        )
         raise ValueError(f"No purchase files matched the configured path: {file_pattern}")
 
     if load_mode == "append" and table_exists(target_table):

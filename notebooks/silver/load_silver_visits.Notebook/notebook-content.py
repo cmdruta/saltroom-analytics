@@ -61,6 +61,7 @@ if not batch_id:
 # - base visits: service, date, time, staff, client, email, phone, client_id, option
 # - booking source: client, email, phone, client_id, service, date, time, staff, booking_source, booked_by
 
+import json
 import re
 
 from pyspark.sql import DataFrame
@@ -89,6 +90,9 @@ SILVER_CLIENTS_TABLE = f"{SILVER_SCHEMA}.clients"
 SILVER_VISITS_TABLE = f"{SILVER_SCHEMA}.visits"
 
 VALID_LOAD_MODES = {"init", "refresh"}
+DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
+NOTEBOOK_NAME = "load_silver_visits"
+PROCESS_NAME = "load_silver_visits"
 
 
 # METADATA ********************
@@ -115,6 +119,105 @@ def table_exists(table_name: str) -> bool:
 
 def ensure_schema_exists(schema_name: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+
+
+def _sample_record(dataframe: DataFrame, condition, columns: list[str] | None = None) -> dict | None:
+    sample_df = dataframe.filter(condition)
+    if columns:
+        sample_df = sample_df.select(*[column_name for column_name in columns if column_name in sample_df.columns])
+    rows = sample_df.limit(1).collect()
+    return rows[0].asDict(recursive=True) if rows else None
+
+
+def write_dq_result(
+    batch_id: str,
+    layer: str,
+    notebook_name: str,
+    process_name: str,
+    target_table: str,
+    check_name: str,
+    severity: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+    status: str = "WARN",
+) -> None:
+    if not batch_id:
+        raise ValueError("batch_id parameter is required before writing DQ results.")
+
+    ensure_schema_exists("dq")
+    sample_record_json = json.dumps(sample_record, default=str) if sample_record else None
+    schema = T.StructType([
+        T.StructField("batch_id", T.StringType(), False),
+        T.StructField("layer", T.StringType(), False),
+        T.StructField("notebook_name", T.StringType(), False),
+        T.StructField("process_name", T.StringType(), False),
+        T.StructField("target_table", T.StringType(), False),
+        T.StructField("check_name", T.StringType(), False),
+        T.StructField("severity", T.StringType(), False),
+        T.StructField("warning_code", T.StringType(), False),
+        T.StructField("warning_message", T.StringType(), False),
+        T.StructField("affected_row_count", T.LongType(), False),
+        T.StructField("sample_record", T.StringType(), True),
+        T.StructField("status", T.StringType(), False),
+    ])
+    result_df = spark.createDataFrame(
+        [(
+            str(batch_id),
+            layer,
+            notebook_name,
+            process_name,
+            target_table,
+            check_name,
+            severity,
+            warning_code,
+            warning_message,
+            int(affected_row_count or 0),
+            sample_record_json,
+            status,
+        )],
+        schema,
+    ).withColumn("generated_at", F.current_timestamp()).select(
+        "batch_id",
+        "generated_at",
+        "layer",
+        "notebook_name",
+        "process_name",
+        "target_table",
+        "check_name",
+        "severity",
+        "warning_code",
+        "warning_message",
+        "affected_row_count",
+        "sample_record",
+        "status",
+    )
+    result_df.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable(DQ_LOAD_WARNINGS_TABLE)
+
+
+def write_dq_warning(
+    check_name: str,
+    warning_code: str,
+    warning_message: str,
+    affected_row_count: int,
+    sample_record: dict | None = None,
+) -> None:
+    if affected_row_count > 0:
+        write_dq_result(
+            batch_id,
+            "silver",
+            NOTEBOOK_NAME,
+            PROCESS_NAME,
+            SILVER_VISITS_TABLE,
+            check_name,
+            "WARNING",
+            warning_code,
+            warning_message,
+            affected_row_count,
+            sample_record,
+            "WARN",
+        )
 
 
 def normalize_column_name(column_name: str) -> str:
@@ -287,6 +390,20 @@ active_load_mode = validate_load_mode(load_mode)
 
 for required_table in [BASE_VISITS_TABLE, BOOKING_SOURCE_TABLE, SILVER_CLIENTS_TABLE]:
     if not table_exists(required_table):
+        write_dq_result(
+            batch_id,
+            "silver",
+            NOTEBOOK_NAME,
+            PROCESS_NAME,
+            SILVER_VISITS_TABLE,
+            "required_source_table_missing",
+            "ERROR",
+            "SILVER_VISITS_REQUIRED_SOURCE_TABLE_MISSING",
+            f"Required table {required_table} does not exist.",
+            0,
+            {"required_table": required_table},
+            "FAIL",
+        )
         raise ValueError(f"Required table {required_table} does not exist.")
 
 base_visits_raw_df = trim_all_string_fields(normalize_column_names(spark.table(BASE_VISITS_TABLE)))
@@ -881,6 +998,77 @@ dq_summary_row = (
 summary_metric_order = list(dq_summary_row.asDict().keys())
 dq_summary_rows = [(metric_name, str(dq_summary_row[metric_name])) for metric_name in summary_metric_order]
 dq_summary_df = spark.createDataFrame(dq_summary_rows, ["metric_name", "metric_value"])
+
+write_dq_warning(
+    "no_booking_source_match",
+    "SILVER_VISITS_NO_BOOKING_SOURCE_MATCH",
+    "Visit rows could not be matched to a booking source record.",
+    dq_summary_row["rows_with_no_booking_source_match"],
+    _sample_record(final_visits_work_df, F.col("booking_source_match_method") == "unmatched"),
+)
+write_dq_warning(
+    "multiple_booking_source_matches_resolved",
+    "SILVER_VISITS_MULTIPLE_BOOKING_SOURCE_MATCHES_RESOLVED",
+    "Multiple booking source matches were resolved to one candidate.",
+    dq_summary_row["rows_with_multiple_booking_source_matches_resolved"],
+    _sample_record(final_visits_work_df, F.col("has_multiple_booking_source_matches_resolved")),
+)
+write_dq_warning(
+    "unmatched_client",
+    "SILVER_VISITS_UNMATCHED_CLIENT",
+    "Visit rows could not be matched to silver.clients.",
+    dq_summary_row["rows_unmatched_to_clients"],
+    _sample_record(final_visits_work_df, F.col("client_match_method") == "unmatched"),
+)
+write_dq_warning(
+    "multiple_client_matches_resolved",
+    "SILVER_VISITS_MULTIPLE_CLIENT_MATCHES_RESOLVED",
+    "Multiple client matches were resolved to one candidate.",
+    dq_summary_row["rows_with_multiple_client_matches_resolved"],
+    _sample_record(final_visits_work_df, F.col("has_multiple_client_matches_resolved")),
+)
+write_dq_warning(
+    "missing_visit_date",
+    "SILVER_VISITS_MISSING_VISIT_DATE",
+    "Visit rows are missing visit date.",
+    dq_summary_row["rows_missing_visit_date"],
+    _sample_record(final_visits_work_df, F.col("visit_date_raw").isNull()),
+)
+write_dq_warning(
+    "missing_visit_time",
+    "SILVER_VISITS_MISSING_VISIT_TIME",
+    "Visit rows are missing visit time.",
+    dq_summary_row["rows_missing_visit_time"],
+    _sample_record(final_visits_work_df, F.col("visit_time_raw").isNull()),
+)
+write_dq_warning(
+    "missing_service",
+    "SILVER_VISITS_MISSING_SERVICE",
+    "Visit rows are missing service.",
+    dq_summary_row["rows_missing_service"],
+    _sample_record(final_visits_work_df, F.col("service_name").isNull()),
+)
+write_dq_warning(
+    "missing_attendance_status",
+    "SILVER_VISITS_MISSING_ATTENDANCE_STATUS",
+    "Visit rows are missing attendance status.",
+    dq_summary_row["rows_missing_attendance_status"],
+    _sample_record(final_visits_work_df, F.col("attendance_status").isNull()),
+)
+write_dq_warning(
+    "missing_purchase_option",
+    "SILVER_VISITS_MISSING_PURCHASE_OPTION",
+    "Visit rows are missing purchase option.",
+    dq_summary_row["rows_missing_purchase_option"],
+    _sample_record(final_visits_work_df, F.col("purchase_option_name").isNull()),
+)
+write_dq_warning(
+    "duplicate_salt_visit_key",
+    "SILVER_VISITS_DUPLICATE_SALT_VISIT_KEY",
+    "Silver visit rows have duplicate salt_visit_key values.",
+    dq_summary_row["duplicate_salt_visit_key_count"],
+    _sample_record(final_visits_work_df, F.col("duplicate_salt_visit_key_count") > 1),
+)
 
 display(dq_summary_df)
 display(
