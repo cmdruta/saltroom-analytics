@@ -89,7 +89,6 @@ DIM_PURCHASE_ITEM_TABLE = f"{GOLD_SCHEMA}.dim_purchase_item"
 FACT_PURCHASE_TABLE = f"{GOLD_SCHEMA}.fact_purchase"
 FACT_VISIT_TABLE = f"{GOLD_SCHEMA}.fact_visit"
 FACT_TIMECLOCK_TABLE = f"{GOLD_SCHEMA}.fact_timeclock"
-GOLD_DQ_WARNINGS_TABLE = f"{GOLD_SCHEMA}.gold_dq_warnings"
 DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
 NOTEBOOK_NAME = "load_gold_data"
 
@@ -395,7 +394,6 @@ require_columns(
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {GOLD_SCHEMA}")
 
 for table_name in [
-    GOLD_DQ_WARNINGS_TABLE,
     FACT_PURCHASE_TABLE,
     FACT_VISIT_TABLE,
     FACT_TIMECLOCK_TABLE,
@@ -997,21 +995,6 @@ write_delta_table(fact_purchase_df, FACT_PURCHASE_TABLE)
 write_delta_table(fact_visit_df, FACT_VISIT_TABLE)
 write_delta_table(fact_timeclock_df, FACT_TIMECLOCK_TABLE)
 
-warning_frames = [
-    purchase_invalid_date_warnings_df,
-    purchase_client_warnings_df,
-    purchase_item_warnings_df,
-    purchase_staff_warnings_df,
-    visit_invalid_date_warnings_df,
-    visit_client_warnings_df,
-    visit_service_warnings_df,
-    visit_purchase_item_warnings_df,
-    visit_staff_warnings_df,
-    visit_booked_by_warnings_df,
-    timeclock_invalid_date_warnings_df,
-    timeclock_staff_warnings_df,
-]
-
 gold_dq_check_specs = [
     (purchase_invalid_date_warnings_df, "load_gold_fact_purchase", FACT_PURCHASE_TABLE, "invalid_purchase_date", "GOLD_FACT_PURCHASE_INVALID_PURCHASE_DATE", "Purchase rows were excluded from fact_purchase because purchase_date is null or invalid.", "FAIL"),
     (purchase_client_warnings_df, "load_gold_fact_purchase", FACT_PURCHASE_TABLE, "unknown_client_key", "GOLD_FACT_PURCHASE_UNKNOWN_CLIENT_KEY", "Purchase rows used client_key = 0 because the client could not be resolved from silver.clients.", "WARN"),
@@ -1038,24 +1021,6 @@ for warning_dataframe, process_name, target_table, check_name, warning_code, war
         status,
     )
 
-gold_dq_warnings_stage_df = union_all(warning_frames)
-gold_dq_warnings_df = add_surrogate_key(
-    gold_dq_warnings_stage_df,
-    "dq_warning_id",
-    ["table_name", "source_record_id", "warning_type", "warning_message"],
-).select(
-    "dq_warning_id",
-    "table_name",
-    "source_table",
-    "source_record_id",
-    "warning_type",
-    "warning_message",
-    "severity",
-    "created_at_utc",
-)
-
-write_delta_table(gold_dq_warnings_df, GOLD_DQ_WARNINGS_TABLE)
-
 
 # METADATA ********************
 
@@ -1067,6 +1032,12 @@ write_delta_table(gold_dq_warnings_df, GOLD_DQ_WARNINGS_TABLE)
 # CELL ********************
 
 # Display Gold load diagnostics.
+gold_load_warnings_df = (
+    spark.table(DQ_LOAD_WARNINGS_TABLE)
+    .filter((F.col("batch_id") == F.lit(batch_id)) & (F.col("layer") == F.lit("gold")))
+)
+gold_load_warning_count = gold_load_warnings_df.count()
+
 gold_summary_df = spark.createDataFrame(
     [
         ("dim_date", spark.table(DIM_DATE_TABLE).count()),
@@ -1077,17 +1048,17 @@ gold_summary_df = spark.createDataFrame(
         ("fact_purchase", spark.table(FACT_PURCHASE_TABLE).count()),
         ("fact_visit", spark.table(FACT_VISIT_TABLE).count()),
         ("fact_timeclock", spark.table(FACT_TIMECLOCK_TABLE).count()),
-        ("gold_dq_warnings", spark.table(GOLD_DQ_WARNINGS_TABLE).count()),
+        ("dq_load_warnings_gold_current_batch", gold_load_warning_count),
     ],
     ["gold_table", "row_count"],
 )
 display(gold_summary_df)
 
 gold_warning_summary_df = (
-    spark.table(GOLD_DQ_WARNINGS_TABLE)
-    .groupBy("table_name", "warning_type", "severity")
+    gold_load_warnings_df
+    .groupBy("target_table", "warning_code", "severity", "status")
     .agg(F.count("*").alias("warning_count"))
-    .orderBy(F.col("table_name").asc(), F.col("warning_count").desc())
+    .orderBy(F.col("target_table").asc(), F.col("warning_count").desc())
 )
 display(gold_warning_summary_df)
 
@@ -1118,7 +1089,7 @@ display(spark.table(FACT_TIMECLOCK_TABLE).limit(20))
 purchase_count = spark.table(FACT_PURCHASE_TABLE).count()
 visit_count = spark.table(FACT_VISIT_TABLE).count()
 timeclock_count = spark.table(FACT_TIMECLOCK_TABLE).count()
-warning_count = spark.table(GOLD_DQ_WARNINGS_TABLE).count()
+warning_count = gold_load_warning_count
 
 print(
     f"Gold model load completed successfully. "
