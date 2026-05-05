@@ -93,7 +93,7 @@ GOLD_DQ_WARNINGS_TABLE = f"{GOLD_SCHEMA}.gold_dq_warnings"
 DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
 NOTEBOOK_NAME = "load_gold_data"
 
-VALID_LOAD_MODES = {"init", "overwrite"}
+VALID_LOAD_MODES = {"init", "refresh"}
 CURRENT_TIMESTAMP_UTC = F.current_timestamp()
 DECIMAL_18_2 = T.DecimalType(18, 2)
 
