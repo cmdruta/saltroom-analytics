@@ -113,7 +113,7 @@
           {
             "activity": "nb_02_load_silver_clients",
             "dependencyConditions": [
-              "Completed"
+              "Succeeded"
             ]
           }
         ]
@@ -152,7 +152,7 @@
           {
             "activity": "nb_03_load_silver_purchases",
             "dependencyConditions": [
-              "Completed"
+              "Succeeded"
             ]
           }
         ]
