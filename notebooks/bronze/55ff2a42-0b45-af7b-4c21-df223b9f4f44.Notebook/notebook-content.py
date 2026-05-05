@@ -586,8 +586,7 @@ run_bronze_ingestion(config, selected_entities, active_load_mode)
 
 print(
     "Bronze ingestion completed successfully for "
-    f"{selected_entities} using load modes "
-    f"{ {entity_name: entity_load_modes[entity_name] for entity_name in selected_entities} }."
+    f"{selected_entities} using LOAD_MODE='{active_load_mode}'."
 )
 
 # METADATA ********************
