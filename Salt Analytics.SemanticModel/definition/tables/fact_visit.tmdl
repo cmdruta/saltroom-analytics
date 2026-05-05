@@ -1,0 +1,147 @@
+table fact_visit
+	lineageTag: b153da59-1480-4998-9bc8-fb65b2bf4263
+	sourceLineageTag: [gold].[fact_visit]
+
+	column visit_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: b7c88e59-bfbc-4879-8bf6-419a0ea09a1b
+		sourceLineageTag: visit_date_key
+		summarizeBy: sum
+		sourceColumn: visit_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_key
+		dataType: int64
+		formatString: 0
+		lineageTag: f4124539-4068-4c48-bf9e-eebdb16ec7a5
+		sourceLineageTag: client_key
+		summarizeBy: sum
+		sourceColumn: client_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 79a0a65c-d2a2-4cd5-860f-339d54831457
+		sourceLineageTag: service_key
+		summarizeBy: sum
+		sourceColumn: service_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column staff_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 1432b43d-9239-4a07-b061-0495c87869cd
+		sourceLineageTag: staff_key
+		summarizeBy: sum
+		sourceColumn: staff_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column booked_by_staff_key
+		dataType: int64
+		formatString: 0
+		lineageTag: fd08573f-55ea-4026-8f6e-b868b6421c9f
+		sourceLineageTag: booked_by_staff_key
+		summarizeBy: sum
+		sourceColumn: booked_by_staff_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column purchase_item_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 76256921-b3f9-49c6-997e-6a5b5edd5770
+		sourceLineageTag: purchase_item_key
+		summarizeBy: sum
+		sourceColumn: purchase_item_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column attendance_status
+		dataType: string
+		lineageTag: 0371473e-6072-42b2-83e1-5e096e0d305b
+		sourceLineageTag: attendance_status
+		summarizeBy: none
+		sourceColumn: attendance_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column booking_source
+		dataType: string
+		lineageTag: dbdc8dce-f395-4fac-b885-0e95328a682d
+		sourceLineageTag: booking_source
+		summarizeBy: none
+		sourceColumn: booking_source
+
+		annotation SummarizationSetBy = Automatic
+
+	column visit_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 1fec7b2b-dd15-471c-8e72-778de81be72c
+		sourceLineageTag: visit_count
+		summarizeBy: sum
+		sourceColumn: visit_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column attended_flag
+		dataType: int64
+		formatString: 0
+		lineageTag: 7cef36fc-c468-4de1-9d13-eb3c58e1c7fa
+		sourceLineageTag: attended_flag
+		summarizeBy: sum
+		sourceColumn: attended_flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_visit_id
+		dataType: string
+		lineageTag: 1f466a9a-76ac-4a74-85e2-99322734e03a
+		sourceLineageTag: source_visit_id
+		summarizeBy: none
+		sourceColumn: source_visit_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file_name
+		dataType: string
+		lineageTag: 7c7d9f6b-3c7b-44f8-95f1-dc664e8d979e
+		sourceLineageTag: source_file_name
+		summarizeBy: none
+		sourceColumn: source_file_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_loaded_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 812d6707-98b5-4238-8554-2094ff4426bc
+		sourceLineageTag: source_loaded_at
+		summarizeBy: none
+		sourceColumn: source_loaded_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 1b14f76a-deae-4350-8884-907589587c09
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_visit = entity
+		mode: directLake
+		source
+			entityName: fact_visit
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+

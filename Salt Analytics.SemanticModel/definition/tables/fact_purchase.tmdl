@@ -1,0 +1,163 @@
+table fact_purchase
+	lineageTag: cc2d83a3-4669-45c8-b7cc-3ba123cee5f8
+	sourceLineageTag: [gold].[fact_purchase]
+
+	column purchase_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 432fafa6-ba9b-46c7-bb20-7019cf2c051e
+		sourceLineageTag: purchase_date_key
+		summarizeBy: sum
+		sourceColumn: purchase_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 64b90d32-2fa3-4ec1-83c7-c86f5a7e4a72
+		sourceLineageTag: client_key
+		summarizeBy: sum
+		sourceColumn: client_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column purchase_item_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 5b6bf44e-21d3-41f8-9896-a8b1ee264573
+		sourceLineageTag: purchase_item_key
+		summarizeBy: sum
+		sourceColumn: purchase_item_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column sold_by_staff_key
+		dataType: int64
+		formatString: 0
+		lineageTag: f0ba294a-be8d-4b82-a620-85f14df8928f
+		sourceLineageTag: sold_by_staff_key
+		summarizeBy: sum
+		sourceColumn: sold_by_staff_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_purchase_item_id
+		dataType: string
+		lineageTag: dfb645e4-689d-46de-956a-55fa80b4f160
+		sourceLineageTag: source_purchase_item_id
+		summarizeBy: none
+		sourceColumn: source_purchase_item_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column gross_amount
+		dataType: double
+		lineageTag: b8fcb535-7234-490b-8de3-aa8bce7145dd
+		sourceLineageTag: gross_amount
+		summarizeBy: sum
+		sourceColumn: gross_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column discount_amount
+		dataType: double
+		lineageTag: d706dd8f-a329-4cee-bcf8-8d08d6f520c4
+		sourceLineageTag: discount_amount
+		summarizeBy: sum
+		sourceColumn: discount_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_sales_amount
+		dataType: double
+		lineageTag: 3fb5aa11-ac56-498e-8003-1c57dbdec665
+		sourceLineageTag: net_sales_amount
+		summarizeBy: sum
+		sourceColumn: net_sales_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tax_amount
+		dataType: double
+		lineageTag: b9598d52-fb49-4b3e-8c5b-f68fa5c2e18e
+		sourceLineageTag: tax_amount
+		summarizeBy: sum
+		sourceColumn: tax_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_paid_amount
+		dataType: double
+		lineageTag: 20184c54-535e-44a1-9768-27a5eeeaa89b
+		sourceLineageTag: total_paid_amount
+		summarizeBy: sum
+		sourceColumn: total_paid_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 797af72f-306b-42d1-bed2-d5a316b195d0
+		sourceLineageTag: quantity
+		summarizeBy: sum
+		sourceColumn: quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column discount_code
+		dataType: string
+		lineageTag: d073e530-a74f-4223-a7cf-f4b43a6922d6
+		sourceLineageTag: discount_code
+		summarizeBy: none
+		sourceColumn: discount_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file_name
+		dataType: string
+		lineageTag: fe39b7ba-925d-40eb-baa5-79db9f258a08
+		sourceLineageTag: source_file_name
+		summarizeBy: none
+		sourceColumn: source_file_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_loaded_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 534760b3-39a6-4bef-b01e-b3c195ffab01
+		sourceLineageTag: source_loaded_at
+		summarizeBy: none
+		sourceColumn: source_loaded_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: d7d2949f-b8dd-4ee4-9123-0a53deadd21f
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_purchase = entity
+		mode: directLake
+		source
+			entityName: fact_purchase
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+

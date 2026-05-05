@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Salt Analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9bea0b60-703d-b3a1-46c6-c436c4b4c0e7"
+  }
+}

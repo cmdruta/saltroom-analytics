@@ -1,0 +1,49 @@
+table dim_service
+	lineageTag: 2c6104e2-e128-4c34-bb8b-3d3a0a9ac0c2
+	sourceLineageTag: [gold].[dim_service]
+
+	column service_key
+		dataType: int64
+		formatString: 0
+		lineageTag: f94c82c4-e0ba-4062-8be3-9293661ce9fe
+		sourceLineageTag: service_key
+		summarizeBy: sum
+		sourceColumn: service_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_name
+		dataType: string
+		lineageTag: 655c776e-7b11-4524-aae4-1827d23f0915
+		sourceLineageTag: service_name
+		summarizeBy: none
+		sourceColumn: service_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_category
+		dataType: string
+		lineageTag: 48d1c5a2-6cc9-44ce-a71d-193e6b3bc5e5
+		sourceLineageTag: service_category
+		summarizeBy: none
+		sourceColumn: service_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: c746ddbd-e4f0-4380-abb8-80089b01ac07
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_service = entity
+		mode: directLake
+		source
+			entityName: dim_service
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+

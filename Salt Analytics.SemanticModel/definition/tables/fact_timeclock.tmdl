@@ -1,0 +1,99 @@
+table fact_timeclock
+	lineageTag: 3c19f3c7-516c-4831-93cd-e34b73a51113
+	sourceLineageTag: [gold].[fact_timeclock]
+
+	column work_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 2d319d9e-3001-48c4-b7dd-4d5a6a6d33c7
+		sourceLineageTag: work_date_key
+		summarizeBy: sum
+		sourceColumn: work_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column staff_key
+		dataType: int64
+		formatString: 0
+		lineageTag: d6aea0c3-693c-4adf-88e2-e61f44c8f07e
+		sourceLineageTag: staff_key
+		summarizeBy: sum
+		sourceColumn: staff_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column hours_worked
+		dataType: double
+		lineageTag: 5517db67-add7-47f1-94cc-95e00848d2e4
+		sourceLineageTag: hours_worked
+		summarizeBy: sum
+		sourceColumn: hours_worked
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column shift_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 2bda9ef0-b9bf-42e9-9c51-92bc9aa8d841
+		sourceLineageTag: shift_count
+		summarizeBy: sum
+		sourceColumn: shift_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_timeclock_record_id
+		dataType: string
+		lineageTag: 5c6acbf7-47f9-425f-b12b-e96d021ca912
+		sourceLineageTag: source_timeclock_record_id
+		summarizeBy: none
+		sourceColumn: source_timeclock_record_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_row_hash
+		dataType: string
+		lineageTag: 80d7c2ce-4890-4ff0-ae72-afe0b490da2e
+		sourceLineageTag: source_row_hash
+		summarizeBy: none
+		sourceColumn: source_row_hash
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file_name
+		dataType: string
+		lineageTag: 14b1a4c0-aeca-451f-b2e2-138b7102a219
+		sourceLineageTag: source_file_name
+		summarizeBy: none
+		sourceColumn: source_file_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_loaded_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 8aebe181-8eb6-4d1e-ab38-68288b711cc7
+		sourceLineageTag: source_loaded_at
+		summarizeBy: none
+		sourceColumn: source_loaded_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 8136180f-e205-41c8-aa1b-85d6dd03df27
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_timeclock = entity
+		mode: directLake
+		source
+			entityName: fact_timeclock
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+

@@ -1,0 +1,95 @@
+table dim_client
+	lineageTag: 8dbeb4fe-cee9-4b40-9e33-c7d8aa714093
+	sourceLineageTag: [gold].[dim_client]
+
+	column client_key
+		dataType: int64
+		formatString: 0
+		lineageTag: d1822aa5-cb0c-4eca-b547-1fed8969d713
+		sourceLineageTag: client_key
+		summarizeBy: sum
+		sourceColumn: client_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column silver_client_key
+		dataType: string
+		lineageTag: e2dcc8fc-1a4a-4460-a1a2-5a0ed8f6fa2d
+		sourceLineageTag: silver_client_key
+		summarizeBy: none
+		sourceColumn: silver_client_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_client_id
+		dataType: string
+		lineageTag: 2f30a1a1-26d1-47ed-afad-979f860e00dc
+		sourceLineageTag: source_client_id
+		summarizeBy: none
+		sourceColumn: source_client_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_member_id
+		dataType: string
+		lineageTag: 40983b62-c3dd-46e4-b9cd-3396897fea5b
+		sourceLineageTag: source_member_id
+		summarizeBy: none
+		sourceColumn: source_member_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_name
+		dataType: string
+		lineageTag: 941d64ca-1397-4a9e-adb3-c93e56a34069
+		sourceLineageTag: client_name
+		summarizeBy: none
+		sourceColumn: client_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_status
+		dataType: string
+		lineageTag: 67067a20-0640-4f6a-9fe5-7c03c0debbb5
+		sourceLineageTag: client_status
+		summarizeBy: none
+		sourceColumn: client_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column registration_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e083341d-4e1c-476a-a38f-6e67fc0f465c
+		sourceLineageTag: registration_date
+		summarizeBy: none
+		sourceColumn: registration_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column zipcode
+		dataType: string
+		lineageTag: f56f7b48-1b96-49ab-9e79-3eff66e0490c
+		sourceLineageTag: zipcode
+		summarizeBy: none
+		sourceColumn: zipcode
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: fd006c98-bc43-4393-a79f-e6ccc1393fe5
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_client = entity
+		mode: directLake
+		source
+			entityName: dim_client
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+

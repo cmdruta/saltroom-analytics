@@ -1,0 +1,49 @@
+table dim_staff
+	lineageTag: 0223e63d-98a1-4558-9fb1-a723070eff80
+	sourceLineageTag: [gold].[dim_staff]
+
+	column staff_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a13bcaa-ead9-4de8-ba77-d0474de50cf1
+		sourceLineageTag: staff_key
+		summarizeBy: sum
+		sourceColumn: staff_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column staff_name
+		dataType: string
+		lineageTag: 0802d97d-97b3-4027-b49a-262fe7dd2861
+		sourceLineageTag: staff_name
+		summarizeBy: none
+		sourceColumn: staff_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column staff_type
+		dataType: string
+		lineageTag: ba23ba2a-5672-430f-844e-326b93ddfd62
+		sourceLineageTag: staff_type
+		summarizeBy: none
+		sourceColumn: staff_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: ce8a65f3-76da-4043-9670-48dbf3b39e95
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_staff = entity
+		mode: directLake
+		source
+			entityName: dim_staff
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+
