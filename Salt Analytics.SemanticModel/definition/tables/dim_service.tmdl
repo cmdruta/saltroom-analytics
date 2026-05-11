@@ -7,7 +7,7 @@ table dim_service
 		formatString: 0
 		lineageTag: f94c82c4-e0ba-4062-8be3-9293661ce9fe
 		sourceLineageTag: service_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: service_key
 
 		annotation SummarizationSetBy = Automatic

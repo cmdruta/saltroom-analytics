@@ -7,7 +7,7 @@ table dim_client
 		formatString: 0
 		lineageTag: d1822aa5-cb0c-4eca-b547-1fed8969d713
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic

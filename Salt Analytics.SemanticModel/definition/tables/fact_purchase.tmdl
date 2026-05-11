@@ -7,7 +7,7 @@ table fact_purchase
 		formatString: 0
 		lineageTag: 432fafa6-ba9b-46c7-bb20-7019cf2c051e
 		sourceLineageTag: purchase_date_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_date_key
 
 		annotation SummarizationSetBy = Automatic
@@ -17,7 +17,7 @@ table fact_purchase
 		formatString: 0
 		lineageTag: 64b90d32-2fa3-4ec1-83c7-c86f5a7e4a72
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
@@ -27,7 +27,7 @@ table fact_purchase
 		formatString: 0
 		lineageTag: 5b6bf44e-21d3-41f8-9896-a8b1ee264573
 		sourceLineageTag: purchase_item_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic

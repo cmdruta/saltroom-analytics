@@ -7,7 +7,7 @@ table dim_staff
 		formatString: 0
 		lineageTag: 6a13bcaa-ead9-4de8-ba77-d0474de50cf1
 		sourceLineageTag: staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: staff_key
 
 		annotation SummarizationSetBy = Automatic

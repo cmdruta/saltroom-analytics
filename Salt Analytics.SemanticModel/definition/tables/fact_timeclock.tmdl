@@ -7,7 +7,7 @@ table fact_timeclock
 		formatString: 0
 		lineageTag: 2d319d9e-3001-48c4-b7dd-4d5a6a6d33c7
 		sourceLineageTag: work_date_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: work_date_key
 
 		annotation SummarizationSetBy = Automatic
@@ -17,7 +17,7 @@ table fact_timeclock
 		formatString: 0
 		lineageTag: d6aea0c3-693c-4adf-88e2-e61f44c8f07e
 		sourceLineageTag: staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: staff_key
 
 		annotation SummarizationSetBy = Automatic

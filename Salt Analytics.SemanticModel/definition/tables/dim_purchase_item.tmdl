@@ -7,7 +7,7 @@ table dim_purchase_item
 		formatString: 0
 		lineageTag: 47fad4d9-5543-40dd-aa88-cfab1ea51587
 		sourceLineageTag: purchase_item_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic

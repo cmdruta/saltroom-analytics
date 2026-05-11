@@ -17,7 +17,7 @@ table fact_visit
 		formatString: 0
 		lineageTag: f4124539-4068-4c48-bf9e-eebdb16ec7a5
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
@@ -27,7 +27,7 @@ table fact_visit
 		formatString: 0
 		lineageTag: 79a0a65c-d2a2-4cd5-860f-339d54831457
 		sourceLineageTag: service_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: service_key
 
 		annotation SummarizationSetBy = Automatic
@@ -47,7 +47,7 @@ table fact_visit
 		formatString: 0
 		lineageTag: fd08573f-55ea-4026-8f6e-b868b6421c9f
 		sourceLineageTag: booked_by_staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: booked_by_staff_key
 
 		annotation SummarizationSetBy = Automatic
