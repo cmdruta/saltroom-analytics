@@ -1,0 +1,295 @@
+table _Measures
+	lineageTag: 7946bf90-1711-462e-b681-d32859e3598f
+
+	measure Discounts = SUM(Purchases[discount_amount])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: ff034261-70e5-467f-894a-f5db94dc9644
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Gross Sales' = SUM(Purchases[gross_amount])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 6327558a-7837-4b27-b7ad-276b4610fbd3
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Quantity Sold' = SUM(Purchases[quantity])
+		formatString: 0
+		isHidden
+		displayFolder: Revenue
+		lineageTag: 4584f0b4-3238-4751-a900-0319b67b1f82
+
+		changedProperty = Name
+
+	measure 'Hours Worked' = SUM(Timeclock[hours_worked])
+		displayFolder: Staff
+		lineageTag: 537f2777-199d-40c5-8ca5-9976508f6483
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Attendance Rate' = DIVIDE([Attended Visits], [Total Visits])
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Client
+		lineageTag: 6ed25020-9501-47c2-a5fd-c15be8fdfb1a
+
+		changedProperty = Name
+
+	measure 'Attended Visits' =
+			
+			CALCULATE(
+			    [Total Visits],
+			    Visits[AttendedFlag] = TRUE()
+			)
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 2bb2e218-96c4-49a0-9a03-f635d5ae7dc6
+
+		changedProperty = Name
+
+	measure 'Total Visits' = COUNTROWS(Visits)
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 21d19fa8-a5e5-4270-9618-9eaa9398c15a
+
+		changedProperty = Name
+
+	measure 'Avg Sale Amount' = DIVIDE([Net Revenue], COUNTROWS(Purchases))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 14c31a06-cc28-41ee-98e9-8aca387277da
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Visits per Client' = DIVIDE([Total Visits], DISTINCTCOUNT(Client[client_key]))
+		displayFolder: Visits
+		lineageTag: 22276df7-df73-4e28-986c-457a2681590a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Visits per Day' = DIVIDE(COUNTROWS(Visits), DISTINCTCOUNT('Date'[date_key]))
+		displayFolder: Visits
+		lineageTag: 86365179-c22b-4b55-8b39-c65c69feca1e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Visits per Service' = DIVIDE(COUNTROWS(Visits), DISTINCTCOUNT(Service[service_key]))
+		displayFolder: Visits
+		lineageTag: 658100e9-c0e3-4be2-a065-37d801be9b8d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'New Registered Clients' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT(Visits[client_key]),
+			    FILTER(
+			        Visits,
+			        RELATED(Client[RegistrationDate]) >= MIN('Date'[CalendarDate]) &&
+			        RELATED(Client[RegistrationDate]) <= MAX('Date'[CalendarDate])
+			    )
+			)
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 5f940b0f-46c8-4683-838b-f27ef253d666
+
+	measure 'Total Clients' = DISTINCTCOUNT(Visits[client_key])
+		formatString: 0
+		displayFolder: Client
+		lineageTag: dec9a472-8f65-4d17-89d4-0ea338cc1faa
+
+	measure 'Returning Clients' = [Total Clients] - [New Clients]
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 626fb2a9-a1eb-469e-aa63-b6e3f2fdaec9
+
+	measure 'New Clients' =
+			
+			VAR PeriodStart =
+			    MIN('Date'[CalendarDate])
+			VAR PeriodEnd =
+			    MAX('Date'[CalendarDate])
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        VALUES(Visits[client_key]),
+			        VAR FirstVisitDate =
+			            CALCULATE(
+			                MIN('Date'[CalendarDate]),
+			                REMOVEFILTERS('Date')
+			            )
+			        RETURN
+			            FirstVisitDate >= PeriodStart
+			                && FirstVisitDate <= PeriodEnd
+			    )
+			)
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 3b6f2e12-17b8-4e59-b552-0da54af94cca
+
+	measure 'Cancelled Visits' =
+			
+			CALCULATE(
+			    [Total Visits],
+			    Visits[AttendedFlag] = FALSE()
+			)
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 77b1d9dd-bd20-4671-a556-e5a88243d985
+
+	measure 'Net Revenue' =
+			
+			SUM(Purchases[net_sales_amount])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 3705f260-8206-41f6-8330-e40c76d20d66
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Transaction Count' =
+			
+			COUNTROWS(Purchases)
+		formatString: 0
+		isHidden
+		lineageTag: d01855b2-c4cd-4936-b6f1-7f4b242c9422
+
+	measure 'Avg Transaction Value' =
+			
+			DIVIDE([Net Revenue], [Transaction Count])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 2270cb35-5056-44f8-827c-bb63a6f9c724
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Revenue per Visit' =
+			
+			DIVIDE([Net Revenue], [Total Visits])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: cff99476-b900-4793-9075-8f4a4e2bb06b
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Revenue per Client' =
+			
+			DIVIDE(
+			    [Net Revenue],
+			    DISTINCTCOUNT(Purchases[client_key])
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 53950442-0808-44a9-8846-a9132d6d44c6
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Revenue per Day' =
+			
+			DIVIDE(
+			    [Net Revenue],
+			    DISTINCTCOUNT('Date'[CalendarDate])
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: ac549128-c638-46c7-a4e8-9a7430e13650
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Returning Client Rate' =
+			
+			DIVIDE([Returning Clients], [Total Clients])
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Client
+		lineageTag: c7ab44da-9a89-4e44-b1e2-1d305da8ac6b
+
+	measure 'New Client Rate' =
+			
+			DIVIDE([New Clients], [Total Clients])
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: Client
+		lineageTag: b2c28159-c94c-4b7e-9e2f-2a969c4434ac
+
+	measure 'Total Purchasing Clients' =
+			
+			DISTINCTCOUNT(Purchases[client_key])
+		formatString: 0
+		displayFolder: Client
+		lineageTag: 54eedf42-07ce-4e77-b283-06e730788ac5
+
+	measure 'Avg Revenue per Purchasing Client' =
+			
+			DIVIDE([Net Revenue], [Total Purchasing Clients])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 428f1cee-3cbf-4a21-923e-959387539c4d
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Membership Revenue' =
+			
+			CALCULATE(
+			    [Net Revenue],
+			    'Purchase Item'[RevenueCategory] = "Membership"
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 11b2b98d-5cdf-48d0-92f2-3c772c7999ff
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Gift Card Revenue' =
+			
+			CALCULATE(
+			    [Net Revenue],
+			    'Purchase Item'[RevenueCategory] = "Gift Card"
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Revenue
+		lineageTag: 7b4d387d-d04a-4cd8-80d7-8790be54dba2
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Average Ticket per Visit' =
+			
+			AVERAGEX(
+			    VALUES(Visits[purchase_item_key]),
+			    CALCULATE([Net Revenue])
+			)
+		displayFolder: Visits
+		lineageTag: 6a701a38-932a-4864-b8f9-8f6d6be892bd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Average Ticket per Client' =
+			
+			DIVIDE(
+			    [Net Revenue],
+			    DISTINCTCOUNT(Purchases[client_key])
+			)
+		lineageTag: 9abf1ed9-abe6-440c-b81b-b17a7a0e219b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Value
+		isHidden
+		formatString: 0
+		lineageTag: 9b23efac-4d9e-48c5-9a34-1a575f6e23c3
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source = { 0 }
+
+	annotation PBI_Id = 5fc7bc5fd255419eb059bedb214d9892
+

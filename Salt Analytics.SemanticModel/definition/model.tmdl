@@ -12,12 +12,14 @@ annotation __PBI_TimeIntelligenceEnabled = 1
 
 annotation PBI_ProTooling = ["DirectLakeOnOneLakeInWeb","WebModelingEdit"]
 
-ref table dim_service
-ref table dim_purchase_item
-ref table dim_date
-ref table dim_staff
-ref table dim_client
-ref table fact_purchase
-ref table fact_timeclock
-ref table fact_visit
+ref table Service
+ref table 'Purchase Item'
+ref table Date
+ref table Staff
+ref table Client
+ref table Purchases
+ref table Timeclock
+ref table Visits
+ref table _Measures
+ref table 'DQ Warnings'
 

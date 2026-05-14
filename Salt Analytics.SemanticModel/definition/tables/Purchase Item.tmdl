@@ -1,49 +1,61 @@
-table dim_purchase_item
+table 'Purchase Item'
 	lineageTag: 90b802bf-a032-419d-a57a-fdd382cbf7ba
 	sourceLineageTag: [gold].[dim_purchase_item]
 
 	column purchase_item_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 47fad4d9-5543-40dd-aa88-cfab1ea51587
 		sourceLineageTag: purchase_item_key
 		summarizeBy: none
 		sourceColumn: purchase_item_key
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
-	column purchase_item_name
+	column PurchaseItemName
 		dataType: string
 		lineageTag: 1b7a83e1-01ee-43a7-8f00-e8134582b5b7
 		sourceLineageTag: purchase_item_name
 		summarizeBy: none
 		sourceColumn: purchase_item_name
 
+		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
 
-	column revenue_category
+	column RevenueCategory
 		dataType: string
 		lineageTag: 486f008e-bb7a-4041-8631-1a3d963e7307
 		sourceLineageTag: revenue_category
 		summarizeBy: none
 		sourceColumn: revenue_category
 
+		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: cbc7341b-f769-4464-aa99-fe76ffec52a1
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_purchase_item = entity
+	partition 'Purchase Item' = entity
 		mode: directLake
 		source
 			entityName: dim_purchase_item
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

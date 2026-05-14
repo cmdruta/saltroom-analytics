@@ -1,24 +1,34 @@
-table dim_date
+table Date
 	lineageTag: 76deb2c5-f033-4bbd-ae7c-f99be496a370
 	sourceLineageTag: [gold].[dim_date]
+	dataCategory: Time
 
 	column date_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 4f0e8ef8-bf28-4522-8aa4-192cd55965a4
 		sourceLineageTag: date_key
 		summarizeBy: none
 		sourceColumn: date_key
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
-	column calendar_date
+	column CalendarDate
 		dataType: dateTime
+		isHidden
+		isKey
 		formatString: General Date
 		lineageTag: a3ac4d24-8b8f-4f62-a9db-745b93ee939b
 		sourceLineageTag: calendar_date
 		summarizeBy: none
 		sourceColumn: calendar_date
+
+		changedProperty = Name
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -27,10 +37,12 @@ table dim_date
 		formatString: 0
 		lineageTag: eaef8a17-a4da-4225-9574-bec6b6a091a7
 		sourceLineageTag: day
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: day
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = SummarizeBy
+
+		annotation SummarizationSetBy = User
 
 	column day_name
 		dataType: string
@@ -41,66 +53,91 @@ table dim_date
 
 		annotation SummarizationSetBy = Automatic
 
-	column day_of_week
+	column DayOfWeek
 		dataType: int64
 		formatString: 0
 		lineageTag: 6299c30c-2f35-4e06-b490-6eb28e8a5c7b
 		sourceLineageTag: day_of_week
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: day_of_week
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = SummarizeBy
 
-	column week_of_year
+		changedProperty = Name
+
+		annotation SummarizationSetBy = User
+
+	column WeekOfYear
 		dataType: int64
 		formatString: 0
 		lineageTag: 65768997-20d1-4c11-bd7d-fa9ee28a79ec
 		sourceLineageTag: week_of_year
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: week_of_year
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = SummarizeBy
 
-	column month
+		changedProperty = Name
+
+		annotation SummarizationSetBy = User
+
+	column Month
 		dataType: int64
 		formatString: 0
 		lineageTag: 232bd14f-edcb-408c-b082-e4439e2cd6ff
 		sourceLineageTag: month
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: month
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = Name
 
-	column month_name
+		changedProperty = SummarizeBy
+
+		annotation SummarizationSetBy = User
+
+	column MonthName
 		dataType: string
 		lineageTag: 2498f78c-d329-4fd5-aac0-2a25cbb6f6d5
 		sourceLineageTag: month_name
 		summarizeBy: none
 		sourceColumn: month_name
+		sortByColumn: Month
+
+		changedProperty = Name
+
+		changedProperty = SortByColumn
 
 		annotation SummarizationSetBy = Automatic
 
-	column quarter
+	column Quarter
 		dataType: int64
 		formatString: 0
 		lineageTag: 52b09181-eca2-4831-ac7c-8843128713e2
 		sourceLineageTag: quarter
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: quarter
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = Name
 
-	column year
+		changedProperty = SummarizeBy
+
+		annotation SummarizationSetBy = User
+
+	column Year
 		dataType: int64
 		formatString: 0
 		lineageTag: 9f9e4a2e-05c6-4abc-ab47-2ac0e25beb93
 		sourceLineageTag: year
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: year
 
-		annotation SummarizationSetBy = Automatic
+		changedProperty = Name
 
-	column is_weekend
+		changedProperty = SummarizeBy
+
+		annotation SummarizationSetBy = User
+
+	column IsWeekend
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
 		lineageTag: ee2704c4-a9dd-4a1c-8e9b-d124f30687c6
@@ -108,22 +145,29 @@ table dim_date
 		summarizeBy: none
 		sourceColumn: is_weekend
 
+		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 7a848cb7-aa1f-459a-94eb-bd48aa4d58cd
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_date = entity
+	partition Date = entity
 		mode: directLake
 		source
 			entityName: dim_date
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 
