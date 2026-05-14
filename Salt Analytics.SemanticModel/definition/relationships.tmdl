@@ -30,3 +30,11 @@ relationship 2d1dbc77-5a06-8079-9353-ebe0f337746b
 	fromColumn: Timeclock.work_date_key
 	toColumn: Date.date_key
 
+relationship 928be39c-ed99-3537-86f0-ed484b5b2527
+	fromColumn: Visits.visit_date_key
+	toColumn: Date.date_key
+
+relationship 35bde5bb-f9d7-2b7d-8826-9556c9c23f66
+	fromColumn: Visits.purchase_item_key
+	toColumn: 'Purchase Item'.purchase_item_key
+
