@@ -22,4 +22,5 @@ ref table Timeclock
 ref table Visits
 ref table _Measures
 ref table 'DQ Warnings'
+ref table 'Client Retention Snapshot'
 

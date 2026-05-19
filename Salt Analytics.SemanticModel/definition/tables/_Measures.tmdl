@@ -256,7 +256,7 @@ table _Measures
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
-	measure 'Average Ticket per Visit' =
+	measure 'Avg Ticket per Visit' =
 			
 			AVERAGEX(
 			    VALUES(Visits[purchase_item_key]),
@@ -267,15 +267,105 @@ table _Measures
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Average Ticket per Client' =
+	measure 'Avg Ticket per Client' =
 			
 			DIVIDE(
 			    [Net Revenue],
 			    DISTINCTCOUNT(Purchases[client_key])
 			)
+		displayFolder: Visits
 		lineageTag: 9abf1ed9-abe6-440c-b81b-b17a7a0e219b
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'At Risk Clients' =
+			
+			CALCULATE (
+			    [Retention Snapshot Clients],
+			    'Client Retention Snapshot'[retention_status] = "At Risk"
+			)
+		formatString: #,0
+		displayFolder: Retention
+		lineageTag: 01ea9d84-2c2b-43f2-ac91-ddf73c9f3502
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Lost Clients' =
+			
+			CALCULATE (
+			    [Retention Snapshot Clients],
+			    'Client Retention Snapshot'[retention_status] = "Lost"
+			)
+		formatString: #,0
+		displayFolder: Retention
+		lineageTag: a70d4dd2-d417-4981-b100-8c0f7e88d3cd
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Retention Snapshot Clients' =
+			
+			DISTINCTCOUNT ( 'Client Retention Snapshot'[client_key] )
+		formatString: #,0
+		displayFolder: Retention
+		lineageTag: 78d2fc29-881e-4575-8d42-9233e3c5c29e
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Revenue at Risk' =
+			
+			CALCULATE (
+			    SUM ( 'Client Retention Snapshot'[lifetime_revenue] ),
+			    'Client Retention Snapshot'[retention_priority] = "High"
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Retention
+		lineageTag: fcda1fa8-c0ba-4d26-a120-4a372cff658f
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Slipping Clients' =
+			
+			CALCULATE (
+			    [Retention Snapshot Clients],
+			    'Client Retention Snapshot'[retention_status] = "Slipping"
+			)
+		formatString: #,0
+		displayFolder: Retention
+		lineageTag: 3211f2a5-f54f-4e53-ae3b-4bb26dc35007
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
+	measure 'Active Clients' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('Client Retention Snapshot'[client_key]),
+			    'Client Retention Snapshot'[retention_status] = "Active"
+			)
+		formatString: #,0
+		displayFolder: Retention
+		lineageTag: caf8621c-c5a2-4ad8-be8a-13f68ada2390
+
+	measure 'Never Visited' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('Client Retention Snapshot'[client_key]),
+			    'Client Retention Snapshot'[retention_status] = "Never Visited"
+			)
+		formatString: #,0
+		displayFolder: Retention
+		lineageTag: 6aa70093-31de-47bc-bad3-d79ce0640f50
 
 	column Value
 		isHidden

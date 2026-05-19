@@ -1,3 +1,4 @@
+/// All rows represent attended visits. No-show and late-cancel analysis is not currently supported.
 table Visits
 	lineageTag: b153da59-1480-4998-9bc8-fb65b2bf4263
 	sourceLineageTag: [gold].[fact_visit]
@@ -195,4 +196,6 @@ table Visits
 			expressionSource: 'DirectLake - saltroom_lakehouse'
 
 	changedProperty = Name
+
+	changedProperty = Description
 

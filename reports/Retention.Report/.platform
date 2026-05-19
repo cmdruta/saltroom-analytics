@@ -1,11 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": {
-    "type": "Notebook",
-    "displayName": "load_gold_client_retention_snapshot"
+    "type": "Report",
+    "displayName": "Retention"
   },
   "config": {
     "version": "2.0",
-    "logicalId": "6b6d7858-7b74-4b92-9a6c-7341ea4db8b5"
+    "logicalId": "a099dfe1-5373-b371-480d-a9a3f3e1db75"
   }
 }
