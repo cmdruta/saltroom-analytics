@@ -38,8 +38,6 @@
           "secureOutput": false
         },
         "name": "nb_01_load_bronze",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": []
       },
       {
@@ -72,8 +70,6 @@
           "secureOutput": false
         },
         "name": "nb_02_load_silver_clients",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "nb_01_load_bronze",
@@ -113,8 +109,6 @@
           "secureOutput": false
         },
         "name": "nb_03_load_silver_purchases",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "nb_02_load_silver_clients",
@@ -154,8 +148,6 @@
           "secureOutput": false
         },
         "name": "nb_04_load_silver_visits",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "nb_03_load_silver_purchases",
@@ -195,8 +187,6 @@
           "secureOutput": false
         },
         "name": "nb_05_load_silver_timeclock",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": [
           {
             "activity": "nb_04_load_silver_visits",
@@ -239,6 +229,38 @@
         "dependsOn": [
           {
             "activity": "nb_05_load_silver_timeclock",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "6b6d7858-7b74-4b92-9a6c-7341ea4db8b5",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "batch_id": {
+              "value": {
+                "value": "@pipeline().parameters.batch_id",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "nb_07_load_client_retention_snapshot",
+        "dependsOn": [
+          {
+            "activity": "nb_06_load_gold_model",
             "dependencyConditions": [
               "Succeeded"
             ]

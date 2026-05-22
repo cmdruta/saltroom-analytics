@@ -8,12 +8,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "6567cb96-1424-4980-8cfb-dc13a43113cc",
+# META       "default_lakehouse": "cf3cdc22-7eba-4baa-91fa-90ee77479818",
 # META       "default_lakehouse_name": "saltroom_lakehouse",
-# META       "default_lakehouse_workspace_id": "9161a515-b087-41f4-8474-27fcb91ae1c0",
+# META       "default_lakehouse_workspace_id": "7b7cf7f0-7b72-4f1f-a6e0-c0c594ce6216",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "6567cb96-1424-4980-8cfb-dc13a43113cc"
+# META           "id": "cf3cdc22-7eba-4baa-91fa-90ee77479818"
 # META         }
 # META       ]
 # META     }
