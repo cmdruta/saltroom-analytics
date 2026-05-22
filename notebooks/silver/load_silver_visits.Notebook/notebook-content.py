@@ -84,7 +84,7 @@ from pyspark.sql import types as T
 
 BRONZE_SCHEMA = "bronze"
 SILVER_SCHEMA = "silver"
-BASE_VISITS_TABLE = f"{BRONZE_SCHEMA}.visits_purchase_option"
+BASE_VISITS_TABLE = f"{BRONZE_SCHEMA}.visits_attendance"
 BOOKING_SOURCE_TABLE = f"{BRONZE_SCHEMA}.visits_booking_source"
 SILVER_CLIENTS_TABLE = f"{SILVER_SCHEMA}.clients"
 SILVER_VISITS_TABLE = f"{SILVER_SCHEMA}.visits"

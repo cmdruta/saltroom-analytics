@@ -1,0 +1,237 @@
+table purchases
+	lineageTag: b44f9691-91da-4496-a4fb-ae3086378de7
+	sourceLineageTag: [bronze].[purchases]
+
+	column date
+		dataType: string
+		lineageTag: 02d61224-fd09-4c69-9867-23dc8dcea56c
+		sourceLineageTag: date
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+	column time
+		dataType: string
+		lineageTag: 537d69c3-3516-4072-9927-9def15a87d39
+		sourceLineageTag: time
+		summarizeBy: none
+		sourceColumn: time
+
+		annotation SummarizationSetBy = Automatic
+
+	column client
+		dataType: string
+		lineageTag: 5f4f7d7b-4839-4613-9b61-49d3f5f1199e
+		sourceLineageTag: client
+		summarizeBy: none
+		sourceColumn: client
+
+		annotation SummarizationSetBy = Automatic
+
+	column member_id
+		dataType: string
+		lineageTag: c2d20792-bd99-4ecb-aacf-e785eb391532
+		sourceLineageTag: member_id
+		summarizeBy: none
+		sourceColumn: member_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: 25396e42-d3ca-403a-89bb-304c126311eb
+		sourceLineageTag: email
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column phone
+		dataType: string
+		lineageTag: b9a846c9-9aee-4b7d-9422-8f373e964b2e
+		sourceLineageTag: phone
+		summarizeBy: none
+		sourceColumn: phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column revenue_category
+		dataType: string
+		lineageTag: 5853094d-305e-4ace-99e2-afe838ad8370
+		sourceLineageTag: revenue_category
+		summarizeBy: none
+		sourceColumn: revenue_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column item
+		dataType: string
+		lineageTag: 2737df97-f515-4384-9e81-4ab6d010f5d8
+		sourceLineageTag: item
+		summarizeBy: none
+		sourceColumn: item
+
+		annotation SummarizationSetBy = Automatic
+
+	column price
+		dataType: string
+		lineageTag: b0d05f53-441c-49cf-909b-8afdbcfdf975
+		sourceLineageTag: price
+		summarizeBy: none
+		sourceColumn: price
+
+		annotation SummarizationSetBy = Automatic
+
+	column subtotal
+		dataType: string
+		lineageTag: 1444373f-c3c1-40d0-b208-6bb148af269f
+		sourceLineageTag: subtotal
+		summarizeBy: none
+		sourceColumn: subtotal
+
+		annotation SummarizationSetBy = Automatic
+
+	column discount_code
+		dataType: string
+		lineageTag: 30d59131-2827-42ff-b48a-78913997bf98
+		sourceLineageTag: discount_code
+		summarizeBy: none
+		sourceColumn: discount_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column discount_amount
+		dataType: string
+		lineageTag: 40be7b5f-9d88-4a1c-ba69-0196500f85c7
+		sourceLineageTag: discount_amount
+		summarizeBy: none
+		sourceColumn: discount_amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_net_sales
+		dataType: string
+		lineageTag: de4f431f-0666-4911-932c-99ee43e41ff6
+		sourceLineageTag: total_net_sales
+		summarizeBy: none
+		sourceColumn: total_net_sales
+
+		annotation SummarizationSetBy = Automatic
+
+	column sales_tax
+		dataType: string
+		lineageTag: be732292-0254-45d3-85d5-e6ba864bb429
+		sourceLineageTag: sales_tax
+		summarizeBy: none
+		sourceColumn: sales_tax
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_taxes
+		dataType: string
+		lineageTag: d3f8b9bf-1578-42af-bdfd-8fefe45dbe1e
+		sourceLineageTag: total_taxes
+		summarizeBy: none
+		sourceColumn: total_taxes
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_paid
+		dataType: string
+		lineageTag: 84759da1-2cd0-45f4-9efa-4d504105a85a
+		sourceLineageTag: total_paid
+		summarizeBy: none
+		sourceColumn: total_paid
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_method
+		dataType: string
+		lineageTag: c67fb552-f418-4c54-ab06-01ba40729b0a
+		sourceLineageTag: payment_method
+		summarizeBy: none
+		sourceColumn: payment_method
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_change
+		dataType: string
+		lineageTag: 133e8594-1a9b-426a-9c0c-8503792d0b72
+		sourceLineageTag: account_change
+		summarizeBy: none
+		sourceColumn: account_change
+
+		annotation SummarizationSetBy = Automatic
+
+	column user_ip
+		dataType: string
+		lineageTag: 8f4c69a4-2157-4bda-bf59-99b900bda274
+		sourceLineageTag: user_ip
+		summarizeBy: none
+		sourceColumn: user_ip
+
+		annotation SummarizationSetBy = Automatic
+
+	column sold_by
+		dataType: string
+		lineageTag: 780d9289-1c2d-4297-bf8f-5213bdf525ab
+		sourceLineageTag: sold_by
+		summarizeBy: none
+		sourceColumn: sold_by
+
+		annotation SummarizationSetBy = Automatic
+
+	column k_purchase_item
+		dataType: string
+		lineageTag: d60d3ee0-3b50-4e6b-8a0b-f17253fdfdda
+		sourceLineageTag: k_purchase_item
+		summarizeBy: none
+		sourceColumn: k_purchase_item
+
+		annotation SummarizationSetBy = Automatic
+
+	column text_payment_method_base
+		dataType: string
+		lineageTag: fe2a6b31-0d15-4d9e-9471-78781b628342
+		sourceLineageTag: text_payment_method_base
+		summarizeBy: none
+		sourceColumn: text_payment_method_base
+
+		annotation SummarizationSetBy = Automatic
+
+	column ingestion_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 9c4a0003-2073-401f-a6f4-b81678b8e6d6
+		sourceLineageTag: ingestion_timestamp
+		summarizeBy: none
+		sourceColumn: ingestion_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file_name
+		dataType: string
+		lineageTag: 5d3acec0-6977-49e6-853d-ea1ddfe77b35
+		sourceLineageTag: source_file_name
+		summarizeBy: none
+		sourceColumn: source_file_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column batch_id
+		dataType: string
+		lineageTag: 07564cca-b462-45b0-888b-7ee9e30be839
+		sourceLineageTag: batch_id
+		summarizeBy: none
+		sourceColumn: batch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition purchases = entity
+		mode: directLake
+		source
+			entityName: purchases
+			schemaName: bronze
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+

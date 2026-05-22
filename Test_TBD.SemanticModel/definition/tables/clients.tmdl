@@ -1,0 +1,210 @@
+table clients
+	lineageTag: 55c671b8-47be-4d26-af14-fcea26398f7d
+	sourceLineageTag: [bronze].[clients]
+
+	column first_name
+		dataType: string
+		lineageTag: c12075fa-bdc4-404d-9ad1-3a6f0901483d
+		sourceLineageTag: first_name
+		summarizeBy: none
+		sourceColumn: first_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_name
+		dataType: string
+		lineageTag: f4577d6c-997b-47db-823e-b0c420c574f3
+		sourceLineageTag: last_name
+		summarizeBy: none
+		sourceColumn: last_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column username
+		dataType: string
+		lineageTag: 8b892ece-e9df-4237-b052-c31ed0152692
+		sourceLineageTag: username
+		summarizeBy: none
+		sourceColumn: username
+
+		annotation SummarizationSetBy = Automatic
+
+	column phone_number
+		dataType: string
+		lineageTag: 22ec8ec3-8753-45e1-a479-cd9f9a1140c2
+		sourceLineageTag: phone_number
+		summarizeBy: none
+		sourceColumn: phone_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column imported
+		dataType: string
+		lineageTag: 5e4f1eb0-3059-471e-bc89-c0b7ae1128b6
+		sourceLineageTag: imported
+		summarizeBy: none
+		sourceColumn: imported
+
+		annotation SummarizationSetBy = Automatic
+
+	column home_phone
+		dataType: string
+		lineageTag: aa7be625-8174-4bea-9420-35d0da593f71
+		sourceLineageTag: home_phone
+		summarizeBy: none
+		sourceColumn: home_phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column work_phone
+		dataType: string
+		lineageTag: 1d53b54d-ef3c-4062-8b64-83424380d950
+		sourceLineageTag: work_phone
+		summarizeBy: none
+		sourceColumn: work_phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_of_birth
+		dataType: string
+		lineageTag: 28638495-74ca-43dd-9819-1c9155098fae
+		sourceLineageTag: date_of_birth
+		summarizeBy: none
+		sourceColumn: date_of_birth
+
+		annotation SummarizationSetBy = Automatic
+
+	column gender
+		dataType: string
+		lineageTag: d1ad7aa6-c982-4b10-aeb4-9c3fb0b5c2ed
+		sourceLineageTag: gender
+		summarizeBy: none
+		sourceColumn: gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column member_id
+		dataType: string
+		lineageTag: eba87f2c-804b-4f0b-96ef-4daac96fcb47
+		sourceLineageTag: member_id
+		summarizeBy: none
+		sourceColumn: member_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column address
+		dataType: string
+		lineageTag: e53eae33-6e62-4e20-97bc-c49efa9b0f56
+		sourceLineageTag: address
+		summarizeBy: none
+		sourceColumn: address
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 53c24ff3-f3e7-4515-9d6d-32bf9dcc2113
+		sourceLineageTag: city
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: 55699e51-db11-4996-95b9-27d13b4ff49d
+		sourceLineageTag: region
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: 0cdfe64a-4b60-4ced-8bfc-aeb495b12c47
+		sourceLineageTag: country
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column postal_zip_code
+		dataType: string
+		lineageTag: dd70b4f8-e66f-461f-a334-66c1a1ae234a
+		sourceLineageTag: postal_zip_code
+		summarizeBy: none
+		sourceColumn: postal_zip_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column check_in_status
+		dataType: string
+		lineageTag: 30589266-a1c5-45f5-8abf-664f6e3cc1b2
+		sourceLineageTag: check_in_status
+		summarizeBy: none
+		sourceColumn: check_in_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_type
+		dataType: string
+		lineageTag: 11a4ce6b-f119-4777-9f8f-fc6b505bd026
+		sourceLineageTag: client_type
+		summarizeBy: none
+		sourceColumn: client_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_since_date
+		dataType: string
+		lineageTag: b8cdba88-ed65-4d3c-9a02-9c0180f54475
+		sourceLineageTag: client_since_date
+		summarizeBy: none
+		sourceColumn: client_since_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column user_id
+		dataType: string
+		lineageTag: ca57c0bd-5988-40d5-b539-eea884fed407
+		sourceLineageTag: user_id
+		summarizeBy: none
+		sourceColumn: user_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column ingestion_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 3ce83420-9025-435e-906f-ffe29f0faf37
+		sourceLineageTag: ingestion_timestamp
+		summarizeBy: none
+		sourceColumn: ingestion_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file_name
+		dataType: string
+		lineageTag: 7c77e2f3-acf2-4e56-a360-d386dddc596e
+		sourceLineageTag: source_file_name
+		summarizeBy: none
+		sourceColumn: source_file_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column batch_id
+		dataType: string
+		lineageTag: 42582f3c-49d1-4cb6-b5ca-62737b002311
+		sourceLineageTag: batch_id
+		summarizeBy: none
+		sourceColumn: batch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition clients = entity
+		mode: directLake
+		source
+			entityName: clients
+			schemaName: bronze
+			expressionSource: 'DirectLake - saltroom_lakehouse'
+
