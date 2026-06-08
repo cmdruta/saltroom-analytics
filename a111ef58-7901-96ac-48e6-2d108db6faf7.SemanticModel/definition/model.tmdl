@@ -22,4 +22,5 @@ ref table dim_purchase_item
 ref table client_retention_snapshot
 ref table dim_date
 ref table dim_staff
+ref table _Measures
 
