@@ -62,24 +62,26 @@ table Visits
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
-	column attendance_status
+	column AttendanceStatus
 		dataType: string
 		lineageTag: 8ceaa6d5-f916-40c9-b861-3c317fa28d94
 		sourceLineageTag: attendance_status
 		summarizeBy: none
 		sourceColumn: attendance_status
 
-		annotation SummarizationSetBy = Automatic
 
-	column booking_source
+		changedProperty = Name
+		annotation SummarizationSetBy = Automatic
+	column BookingSource
 		dataType: string
 		lineageTag: dd49a403-78ce-44dd-896c-f5424e8c5f94
 		sourceLineageTag: booking_source
 		summarizeBy: none
 		sourceColumn: booking_source
 
-		annotation SummarizationSetBy = Automatic
 
+		changedProperty = Name
+		annotation SummarizationSetBy = Automatic
 	column visit_count
 		dataType: int64
 		isHidden
@@ -90,7 +92,7 @@ table Visits
 		sourceColumn: visit_count
 
 		annotation SummarizationSetBy = Automatic
-	column attended_flag
+	column AttendedFlag
 		dataType: int64
 		formatString: 0
 		lineageTag: 4b85e26a-df4a-4b3b-a195-a37f88edd2e5
@@ -98,8 +100,9 @@ table Visits
 		summarizeBy: sum
 		sourceColumn: attended_flag
 
-		annotation SummarizationSetBy = Automatic
 
+		changedProperty = Name
+		annotation SummarizationSetBy = Automatic
 	column source_visit_id
 		dataType: string
 		isHidden

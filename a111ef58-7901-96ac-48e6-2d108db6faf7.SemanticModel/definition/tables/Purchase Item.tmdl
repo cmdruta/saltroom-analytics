@@ -12,24 +12,26 @@ table 'Purchase Item'
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
-	column purchase_item_name
+	column PurchaseItemName
 		dataType: string
 		lineageTag: 9aa6f702-2222-4201-932f-1624e9cec959
 		sourceLineageTag: purchase_item_name
 		summarizeBy: none
 		sourceColumn: purchase_item_name
 
-		annotation SummarizationSetBy = Automatic
 
-	column revenue_category
+		changedProperty = Name
+		annotation SummarizationSetBy = Automatic
+	column RevenueCategory
 		dataType: string
 		lineageTag: a50fabd7-5e2f-4d56-a118-de1eaf9db79b
 		sourceLineageTag: revenue_category
 		summarizeBy: none
 		sourceColumn: revenue_category
 
-		annotation SummarizationSetBy = Automatic
 
+		changedProperty = Name
+		annotation SummarizationSetBy = Automatic
 	column created_at_utc
 		dataType: dateTime
 		isHidden

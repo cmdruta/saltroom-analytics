@@ -6,12 +6,16 @@ table _Measures
 		displayFolder: Revenue
 		lineageTag: ff034261-70e5-467f-894a-f5db94dc9644
 
+		changedProperty = Name
+
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
 	measure 'Gross Sales' = SUM(Purchases[gross_amount])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
 		lineageTag: 6327558a-7837-4b27-b7ad-276b4610fbd3
+
+		changedProperty = Name
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
@@ -21,9 +25,13 @@ table _Measures
 		displayFolder: Revenue
 		lineageTag: 4584f0b4-3238-4751-a900-0319b67b1f82
 
+		changedProperty = Name
+
 	measure 'Hours Worked' = SUM(Timeclock[hours_worked])
 		displayFolder: Staff
 		lineageTag: 537f2777-199d-40c5-8ca5-9976508f6483
+
+		changedProperty = Name
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
@@ -31,6 +39,8 @@ table _Measures
 		formatString: 0
 		displayFolder: Client
 		lineageTag: 21d19fa8-a5e5-4270-9618-9eaa9398c15a
+
+		changedProperty = Name
 
 	measure 'Avg Sale Amount' = DIVIDE([Net Revenue], COUNTROWS(Purchases))
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
@@ -63,8 +73,8 @@ table _Measures
 			    DISTINCTCOUNT(Visits[client_key]),
 			    FILTER(
 			        Visits,
-			        RELATED(Client[registration_date]) >= MIN('Date'[calendar_date]) &&
-			        RELATED(Client[registration_date]) <= MAX('Date'[calendar_date])
+			        RELATED(Client[RegistrationDate]) >= MIN('Date'[CalendarDate]) &&
+			        RELATED(Client[RegistrationDate]) <= MAX('Date'[CalendarDate])
 			    )
 			)
 		formatString: 0
@@ -84,16 +94,16 @@ table _Measures
 	measure 'New Clients' =
 			
 			VAR PeriodStart =
-			    MIN('Date'[calendar_date])
+			    MIN('Date'[CalendarDate])
 			VAR PeriodEnd =
-			    MAX('Date'[calendar_date])
+			    MAX('Date'[CalendarDate])
 			RETURN
 			COUNTROWS(
 			    FILTER(
 			        VALUES(Visits[client_key]),
 			        VAR FirstVisitDate =
 			            CALCULATE(
-			                MIN('Date'[calendar_date]),
+			                MIN('Date'[CalendarDate]),
 			                REMOVEFILTERS('Date')
 			            )
 			        RETURN
@@ -155,7 +165,7 @@ table _Measures
 			
 			DIVIDE(
 			    [Net Revenue],
-			    DISTINCTCOUNT('Date'[calendar_date])
+			    DISTINCTCOUNT('Date'[CalendarDate])
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -197,7 +207,7 @@ table _Measures
 			
 			CALCULATE(
 			    [Net Revenue],
-			    'Purchase Item'[revenue_category] = "Membership"
+			    'Purchase Item'[RevenueCategory] = "Membership"
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -209,7 +219,7 @@ table _Measures
 			
 			CALCULATE(
 			    [Net Revenue],
-			    'Purchase Item'[revenue_category] = "Gift Card"
+			    'Purchase Item'[RevenueCategory] = "Gift Card"
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -249,6 +259,10 @@ table _Measures
 		displayFolder: Retention
 		lineageTag: 01ea9d84-2c2b-43f2-ac91-ddf73c9f3502
 
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
 	measure 'Lost Clients' =
 			
 			CALCULATE (
@@ -259,12 +273,20 @@ table _Measures
 		displayFolder: Retention
 		lineageTag: a70d4dd2-d417-4981-b100-8c0f7e88d3cd
 
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
+
 	measure 'Retention Snapshot Clients' =
 			
 			DISTINCTCOUNT ( 'Client Retention Snapshot'[client_key] )
 		formatString: #,0
 		displayFolder: Retention
 		lineageTag: 78d2fc29-881e-4575-8d42-9233e3c5c29e
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
 
 	measure 'Revenue at Risk' =
 			
@@ -275,6 +297,10 @@ table _Measures
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Retention
 		lineageTag: fcda1fa8-c0ba-4d26-a120-4a372cff658f
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
@@ -287,6 +313,10 @@ table _Measures
 		formatString: #,0
 		displayFolder: Retention
 		lineageTag: 3211f2a5-f54f-4e53-ae3b-4bb26dc35007
+
+		changedProperty = Name
+
+		changedProperty = DisplayFolder
 
 	measure 'Active Clients' =
 			

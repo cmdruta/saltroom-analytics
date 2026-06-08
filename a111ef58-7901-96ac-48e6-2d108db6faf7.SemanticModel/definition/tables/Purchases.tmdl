@@ -110,15 +110,16 @@ table Purchases
 		sourceColumn: quantity
 
 		annotation SummarizationSetBy = Automatic
-	column discount_code
+	column DiscountCode
 		dataType: string
 		lineageTag: ce52a34a-1ce3-43af-ae16-2f7cf15dbe98
 		sourceLineageTag: discount_code
 		summarizeBy: none
 		sourceColumn: discount_code
 
-		annotation SummarizationSetBy = Automatic
 
+		changedProperty = Name
+		annotation SummarizationSetBy = Automatic
 	column source_file_name
 		dataType: string
 		isHidden

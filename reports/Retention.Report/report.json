@@ -1,0 +1,60 @@
+{
+  "config": "{\"version\":\"5.73\",\"themeCollection\":{\"baseTheme\":{\"name\":\"CY26SU05\",\"type\":2,\"version\":{\"visual\":\"2.9.0\",\"report\":\"3.3.0\",\"page\":\"2.3.1\"}}},\"activeSectionIndex\":0,\"defaultDrillFilterOtherVisuals\":true,\"linguisticSchemaSyncVersion\":0,\"settings\":{\"useNewFilterPaneExperience\":true,\"allowChangeFilterTypes\":true,\"useStylableVisualContainerHeader\":true,\"queryLimitOption\":6,\"useEnhancedTooltips\":true,\"exportDataMode\":1,\"useDefaultAggregateDisplayName\":true},\"objects\":{\"section\":[{\"properties\":{\"verticalAlignment\":{\"expr\":{\"Literal\":{\"Value\":\"'Top'\"}}}}}]},\"creationSource\":\"QuickCreate\"}",
+  "layoutOptimization": 0,
+  "resourcePackages": [
+    {
+      "resourcePackage": {
+        "disabled": false,
+        "items": [
+          {
+            "name": "CY26SU05",
+            "path": "BaseThemes/CY26SU05.json",
+            "type": 202
+          }
+        ],
+        "name": "SharedResources",
+        "type": 2
+      }
+    }
+  ],
+  "sections": [
+    {
+      "config": "{\"objects\":{\"outspacePane\":[{\"properties\":{\"width\":{\"expr\":{\"Literal\":{\"Value\":\"187L\"}}}}}]}}",
+      "displayName": "Page 1",
+      "displayOption": 1,
+      "filters": "[{\"name\":\"5d1be6972ebd7246b4e6\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Client Retention Snapshot\"}},\"Property\":\"retention_status\"}},\"type\":\"Categorical\",\"howCreated\":1},{\"name\":\"18c4ef45a0a8cf61d950\",\"expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Entity\":\"Client Retention Snapshot\"}},\"Property\":\"retention_priority\"}},\"type\":\"Categorical\",\"howCreated\":1}]",
+      "height": 720.00,
+      "name": "5c8bf6528b1bd6f85f3b",
+      "visualContainers": [
+        {
+          "config": "{\"name\":\"10b2335b466a6749be53\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":445.6195750363301,\"z\":2,\"width\":1280.5530026314757,\"height\":275.0936726758572,\"tabOrder\":2}}],\"singleVisual\":{\"visualType\":\"tableEx\",\"projections\":{\"Values\":[{\"queryRef\":\"Client Retention Snapshot.retention_status\"},{\"queryRef\":\"Client Retention Snapshot.retention_priority\"},{\"queryRef\":\"Client Retention Snapshot.lifetime_visits\"},{\"queryRef\":\"Client Retention Snapshot.lifetime_revenue\"},{\"queryRef\":\"Client Retention Snapshot.days_since_last_visit\"},{\"queryRef\":\"Client.Client\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"c\",\"Entity\":\"Client Retention Snapshot\",\"Type\":0},{\"Name\":\"c1\",\"Entity\":\"Client\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"retention_status\"},\"Name\":\"Client Retention Snapshot.retention_status\",\"NativeReferenceName\":\"retention_status\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"retention_priority\"},\"Name\":\"Client Retention Snapshot.retention_priority\",\"NativeReferenceName\":\"retention_priority\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"lifetime_visits\"},\"Name\":\"Client Retention Snapshot.lifetime_visits\",\"NativeReferenceName\":\"lifetime_visits\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"lifetime_revenue\"},\"Name\":\"Client Retention Snapshot.lifetime_revenue\",\"NativeReferenceName\":\"lifetime_revenue\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"days_since_last_visit\"},\"Name\":\"Client Retention Snapshot.days_since_last_visit\",\"NativeReferenceName\":\"days_since_last_visit\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c1\"}},\"Property\":\"Client\"},\"Name\":\"Client.Client\",\"NativeReferenceName\":\"Client\"}],\"OrderBy\":[{\"Direction\":1,\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"retention_priority\"}}}]},\"drillFilterOtherVisuals\":true}}",
+          "filters": "[]",
+          "height": 275.09,
+          "width": 1280.55,
+          "x": 0.00,
+          "y": 445.62,
+          "z": 2.00
+        },
+        {
+          "config": "{\"name\":\"480cb62a9aabd68d751a\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":0,\"z\":0,\"width\":1280.5621880614892,\"height\":134.1074066679976}}],\"singleVisual\":{\"visualType\":\"cardVisual\",\"projections\":{\"Data\":[{\"queryRef\":\"_Measures.Active Clients\"},{\"queryRef\":\"_Measures.At Risk Clients\"},{\"queryRef\":\"_Measures.Slipping Clients\"},{\"queryRef\":\"_Measures.Never Visited\"},{\"queryRef\":\"_Measures.Lost Clients\"},{\"queryRef\":\"_Measures.Revenue at Risk\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"_\",\"Entity\":\"_Measures\",\"Type\":0}],\"Select\":[{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"At Risk Clients\"},\"Name\":\"_Measures.At Risk Clients\",\"NativeReferenceName\":\"At Risk Clients\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Slipping Clients\"},\"Name\":\"_Measures.Slipping Clients\",\"NativeReferenceName\":\"Slipping Clients\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Lost Clients\"},\"Name\":\"_Measures.Lost Clients\",\"NativeReferenceName\":\"Lost Clients\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Revenue at Risk\"},\"Name\":\"_Measures.Revenue at Risk\",\"NativeReferenceName\":\"Revenue at Risk\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Active Clients\"},\"Name\":\"_Measures.Active Clients\",\"NativeReferenceName\":\"Active Clients\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Never Visited\"},\"Name\":\"_Measures.Never Visited\",\"NativeReferenceName\":\"Never Visited\"}],\"OrderBy\":[{\"Direction\":2,\"Expression\":{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Active Clients\"}}}]},\"drillFilterOtherVisuals\":true,\"hasDefaultSort\":true,\"objects\":{\"outline\":[{\"properties\":{\"lineColor\":{\"solid\":{\"color\":{\"expr\":{\"ThemeDataColor\":{\"ColorId\":0,\"Percent\":-0.3}}}}}},\"selector\":{\"id\":\"default\"}}],\"glowCustom\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}},\"selector\":{\"id\":\"default\"}}],\"shadowCustom\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"false\"}}}},\"selector\":{\"id\":\"default\"}}],\"value\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}},{\"properties\":{\"textWrap\":{\"expr\":{\"Literal\":{\"Value\":\"false\"}}},\"horizontalAlignment\":{\"expr\":{\"Literal\":{\"Value\":\"'left'\"}}}},\"selector\":{\"id\":\"default\"}}],\"label\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}},\"selector\":{\"id\":\"default\"}}],\"cardCalloutArea\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}},\"backgroundFillColor\":{\"solid\":{\"color\":{\"expr\":{\"ThemeDataColor\":{\"ColorId\":0,\"Percent\":-0.1}}}}}},\"selector\":{\"id\":\"default\"}}]},\"vcObjects\":{\"title\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"false\"}}}}}],\"background\":[{\"properties\":{\"show\":{\"expr\":{\"Literal\":{\"Value\":\"true\"}}}}}]}}}",
+          "filters": "[]",
+          "height": 134.11,
+          "width": 1280.56,
+          "x": 0.00,
+          "y": 0.00,
+          "z": 0.00
+        },
+        {
+          "config": "{\"name\":\"c7b7b4c08a0e4af31925\",\"layouts\":[{\"id\":0,\"position\":{\"x\":0,\"y\":133.52499901810612,\"z\":1,\"width\":365.1828286398806,\"height\":302.44216645065,\"tabOrder\":1}}],\"singleVisual\":{\"visualType\":\"clusteredBarChart\",\"projections\":{\"Category\":[{\"queryRef\":\"Client Retention Snapshot.retention_status\",\"active\":true}],\"Y\":[{\"queryRef\":\"_Measures.Retention Snapshot Clients\"}]},\"prototypeQuery\":{\"Version\":2,\"From\":[{\"Name\":\"_\",\"Entity\":\"_Measures\",\"Type\":0},{\"Name\":\"c\",\"Entity\":\"Client Retention Snapshot\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"c\"}},\"Property\":\"retention_status\"},\"Name\":\"Client Retention Snapshot.retention_status\",\"NativeReferenceName\":\"retention_status\"},{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Retention Snapshot Clients\"},\"Name\":\"_Measures.Retention Snapshot Clients\",\"NativeReferenceName\":\"Retention Snapshot Clients\"}],\"OrderBy\":[{\"Direction\":2,\"Expression\":{\"Measure\":{\"Expression\":{\"SourceRef\":{\"Source\":\"_\"}},\"Property\":\"Retention Snapshot Clients\"}}}]},\"drillFilterOtherVisuals\":true,\"hasDefaultSort\":true}}",
+          "filters": "[]",
+          "height": 302.44,
+          "width": 365.18,
+          "x": 0.00,
+          "y": 133.52,
+          "z": 1.00
+        }
+      ],
+      "width": 1280.00
+    }
+  ]
+}
