@@ -4,14 +4,14 @@ table Date
 
 	column date_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 9d75a060-c3fa-45f1-adc4-c83cceb09eac
 		sourceLineageTag: date_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: date_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column calendar_date
 		dataType: dateTime
 		formatString: General Date
@@ -27,11 +27,10 @@ table Date
 		formatString: 0
 		lineageTag: f1dfb78e-31e6-4a2c-8174-ec5fb33d1075
 		sourceLineageTag: day
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: day
 
 		annotation SummarizationSetBy = Automatic
-
 	column day_name
 		dataType: string
 		lineageTag: 108f0b3f-1393-4352-9f4b-4bd421f2ce54
@@ -40,7 +39,6 @@ table Date
 		sourceColumn: day_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column day_of_week
 		dataType: int64
 		formatString: 0
@@ -112,6 +110,7 @@ table Date
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 307a41de-59ca-42c1-8b80-a48e467480fa
 		sourceLineageTag: created_at_utc

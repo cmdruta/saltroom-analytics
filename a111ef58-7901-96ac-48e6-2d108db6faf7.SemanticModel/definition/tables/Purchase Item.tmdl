@@ -4,14 +4,14 @@ table 'Purchase Item'
 
 	column purchase_item_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 50aeaaee-41b4-4245-ab1e-428d0d27c1b6
 		sourceLineageTag: purchase_item_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column purchase_item_name
 		dataType: string
 		lineageTag: 9aa6f702-2222-4201-932f-1624e9cec959
@@ -32,6 +32,7 @@ table 'Purchase Item'
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 1571fa45-d181-498e-b142-a1960da16130
 		sourceLineageTag: created_at_utc

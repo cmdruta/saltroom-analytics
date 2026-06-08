@@ -4,14 +4,14 @@ table Service
 
 	column service_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: a4ba375c-e387-4cb4-b390-173ecc7d38ff
 		sourceLineageTag: service_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: service_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column service_name
 		dataType: string
 		lineageTag: e64678bb-9e7b-45e7-b5e4-04b7b9009752
@@ -32,6 +32,7 @@ table Service
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: c167fe2b-57cf-49ab-9cd0-12c69b44773d
 		sourceLineageTag: created_at_utc

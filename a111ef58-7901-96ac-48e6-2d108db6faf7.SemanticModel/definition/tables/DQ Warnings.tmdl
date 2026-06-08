@@ -4,6 +4,7 @@ table 'DQ Warnings'
 
 	column dq_warning_id
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 16e56fad-0f71-41aa-bdde-1749fcf24851
 		sourceLineageTag: dq_warning_id
@@ -11,63 +12,63 @@ table 'DQ Warnings'
 		sourceColumn: dq_warning_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column table_name
 		dataType: string
+		isHidden
 		lineageTag: cef93d5c-3d32-4ca9-b481-43791a99f6ee
 		sourceLineageTag: table_name
 		summarizeBy: none
 		sourceColumn: table_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_table
 		dataType: string
+		isHidden
 		lineageTag: 9719041d-070f-408e-9732-74444f277a6b
 		sourceLineageTag: source_table
 		summarizeBy: none
 		sourceColumn: source_table
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_record_id
 		dataType: string
+		isHidden
 		lineageTag: 5f2b3b4b-f119-42d3-a2cf-52e51cae39b9
 		sourceLineageTag: source_record_id
 		summarizeBy: none
 		sourceColumn: source_record_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column warning_type
 		dataType: string
+		isHidden
 		lineageTag: 7a278e90-1a5f-49e9-ae86-69a3121f23a6
 		sourceLineageTag: warning_type
 		summarizeBy: none
 		sourceColumn: warning_type
 
 		annotation SummarizationSetBy = Automatic
-
 	column warning_message
 		dataType: string
+		isHidden
 		lineageTag: 23527fbd-5ee2-4f9a-b589-35980b0c5a5e
 		sourceLineageTag: warning_message
 		summarizeBy: none
 		sourceColumn: warning_message
 
 		annotation SummarizationSetBy = Automatic
-
 	column severity
 		dataType: string
+		isHidden
 		lineageTag: 78dd9566-b830-4175-b2cc-862708f520b8
 		sourceLineageTag: severity
 		summarizeBy: none
 		sourceColumn: severity
 
 		annotation SummarizationSetBy = Automatic
-
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 5bd0c9ef-50da-4a21-99a3-b95713a40fec
 		sourceLineageTag: created_at_utc

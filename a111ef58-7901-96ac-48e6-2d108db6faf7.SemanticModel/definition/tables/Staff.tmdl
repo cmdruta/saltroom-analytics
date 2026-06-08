@@ -4,14 +4,14 @@ table Staff
 
 	column staff_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 41f1ae9b-0da3-430b-9747-7323e9f89f69
 		sourceLineageTag: staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: staff_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column staff_name
 		dataType: string
 		lineageTag: 7f896705-45d7-458b-90d0-e8c565726d27
@@ -32,6 +32,7 @@ table Staff
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 34b7ae50-d171-4da8-943a-3bfb0dfe43fe
 		sourceLineageTag: created_at_utc

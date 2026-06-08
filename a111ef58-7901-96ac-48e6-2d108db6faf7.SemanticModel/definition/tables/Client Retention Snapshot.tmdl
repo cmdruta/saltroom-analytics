@@ -11,35 +11,34 @@ table 'Client Retention Snapshot'
 		sourceColumn: snapshot_date
 
 		annotation SummarizationSetBy = Automatic
-
 	column batch_id
 		dataType: string
+		isHidden
 		lineageTag: 6478f4e3-7f59-457e-8432-1067b8efa43b
 		sourceLineageTag: batch_id
 		summarizeBy: none
 		sourceColumn: batch_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column client_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 0d9d5cef-45bc-496a-abfc-7260b7816daf
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column client_name
 		dataType: string
+		isHidden
 		lineageTag: eb25f528-3f33-4a84-81ca-2454e24673e9
 		sourceLineageTag: client_name
 		summarizeBy: none
 		sourceColumn: client_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column last_visit_date
 		dataType: dateTime
 		formatString: General Date
@@ -49,117 +48,109 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_visit_date
 
 		annotation SummarizationSetBy = Automatic
-
 	column days_since_last_visit
 		dataType: int64
 		formatString: 0
 		lineageTag: fb4f32ce-7a85-4fe5-b186-5028ba5a372a
 		sourceLineageTag: days_since_last_visit
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: days_since_last_visit
 
 		annotation SummarizationSetBy = Automatic
-
 	column lifetime_visits
 		dataType: int64
 		formatString: 0
 		lineageTag: bdfcf2ae-ba10-438d-abea-015c00283b20
 		sourceLineageTag: lifetime_visits
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: lifetime_visits
 
 		annotation SummarizationSetBy = Automatic
-
 	column visits_last_30_days
 		dataType: int64
 		formatString: 0
 		lineageTag: 306b270b-3570-4f08-962f-51321bedd05a
 		sourceLineageTag: visits_last_30_days
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: visits_last_30_days
 
 		annotation SummarizationSetBy = Automatic
-
 	column visits_last_60_days
 		dataType: int64
 		formatString: 0
 		lineageTag: c43d83a2-1687-4ef5-88ee-4b25b24de81d
 		sourceLineageTag: visits_last_60_days
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: visits_last_60_days
 
 		annotation SummarizationSetBy = Automatic
-
 	column visits_last_90_days
 		dataType: int64
 		formatString: 0
 		lineageTag: bb5c51ca-f3e4-478c-949b-db4f8fda1d34
 		sourceLineageTag: visits_last_90_days
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: visits_last_90_days
 
 		annotation SummarizationSetBy = Automatic
-
 	column lifetime_revenue
 		dataType: double
 		lineageTag: 3240e403-2c69-4e8d-b73c-b0dd18312f13
 		sourceLineageTag: lifetime_revenue
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: lifetime_revenue
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column revenue_last_90_days
 		dataType: double
 		lineageTag: 37c8ae47-4bf2-4166-8281-770cce5bcc2c
 		sourceLineageTag: revenue_last_90_days
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: revenue_last_90_days
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column last_service_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: c7049145-ba77-4c0d-af2a-9dc1fb61f334
 		sourceLineageTag: last_service_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: last_service_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column last_service_name
 		dataType: string
+		isHidden
 		lineageTag: 2fed6cff-8454-4624-bda5-2e8bd86b4fc1
 		sourceLineageTag: last_service_name
 		summarizeBy: none
 		sourceColumn: last_service_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column last_purchase_item_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 0916fcc8-e1d8-479e-b39a-30e838703f9a
 		sourceLineageTag: last_purchase_item_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: last_purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column last_purchase_item_name
 		dataType: string
+		isHidden
 		lineageTag: aa288cd0-2e86-462e-bb22-a34012774326
 		sourceLineageTag: last_purchase_item_name
 		summarizeBy: none
 		sourceColumn: last_purchase_item_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column last_discount_code
 		dataType: string
 		lineageTag: 4532db8e-495c-4a83-8731-59c49c5dcf7f
@@ -168,7 +159,6 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_discount_code
 
 		annotation SummarizationSetBy = Automatic
-
 	column retention_status
 		dataType: string
 		lineageTag: 36674698-63a5-4442-ae6e-f106054fded1
@@ -177,7 +167,6 @@ table 'Client Retention Snapshot'
 		sourceColumn: retention_status
 
 		annotation SummarizationSetBy = Automatic
-
 	column retention_priority
 		dataType: string
 		lineageTag: 23c6b142-137c-4276-b113-455155d53f7b
@@ -186,7 +175,6 @@ table 'Client Retention Snapshot'
 		sourceColumn: retention_priority
 
 		annotation SummarizationSetBy = Automatic
-
 	column recommended_action
 		dataType: string
 		lineageTag: 7b4d65dd-06c8-4c3e-bc29-5bb9097682fa
@@ -195,9 +183,9 @@ table 'Client Retention Snapshot'
 		sourceColumn: recommended_action
 
 		annotation SummarizationSetBy = Automatic
-
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 1a8398be-6c2d-40dd-8afc-092b08c699da
 		sourceLineageTag: created_at_utc
@@ -205,9 +193,9 @@ table 'Client Retention Snapshot'
 		sourceColumn: created_at_utc
 
 		annotation SummarizationSetBy = Automatic
-
 	column updated_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 0fb7034f-a081-4ab1-bca2-6c837d124d65
 		sourceLineageTag: updated_at_utc

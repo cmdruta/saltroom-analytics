@@ -4,118 +4,112 @@ table Purchases
 
 	column purchase_date_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 0e22e576-b155-4a0e-809a-1e1933570045
 		sourceLineageTag: purchase_date_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_date_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column client_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 24ea0885-4629-46bc-8d51-a3e3a0aa0f4b
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column purchase_item_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 54e29f1d-77cd-413e-a12e-260649fcdb3c
 		sourceLineageTag: purchase_item_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column sold_by_staff_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 8e734093-3669-47e1-bb29-42d3e254053b
 		sourceLineageTag: sold_by_staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: sold_by_staff_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_purchase_item_id
 		dataType: string
+		isHidden
 		lineageTag: 4e1838fa-822c-408e-9d8c-7b06438abb10
 		sourceLineageTag: source_purchase_item_id
 		summarizeBy: none
 		sourceColumn: source_purchase_item_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column gross_amount
 		dataType: double
 		lineageTag: b2e646a3-223b-49e3-9517-c8c96af11414
 		sourceLineageTag: gross_amount
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: gross_amount
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column discount_amount
 		dataType: double
 		lineageTag: 6863169b-2df1-4744-be0a-db302119938a
 		sourceLineageTag: discount_amount
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: discount_amount
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column net_sales_amount
 		dataType: double
 		lineageTag: b4155410-100c-427b-a86e-23652829fc1d
 		sourceLineageTag: net_sales_amount
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: net_sales_amount
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column tax_amount
 		dataType: double
 		lineageTag: a404f570-3a9b-48e2-9d6e-f4ec03b3046f
 		sourceLineageTag: tax_amount
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: tax_amount
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column total_paid_amount
 		dataType: double
 		lineageTag: ad4bc462-3e2b-433f-942a-b7216a691076
 		sourceLineageTag: total_paid_amount
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: total_paid_amount
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column quantity
 		dataType: int64
 		formatString: 0
 		lineageTag: d5a2d697-afb3-4673-948c-489b769804f3
 		sourceLineageTag: quantity
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: quantity
 
 		annotation SummarizationSetBy = Automatic
-
 	column discount_code
 		dataType: string
 		lineageTag: ce52a34a-1ce3-43af-ae16-2f7cf15dbe98
@@ -127,15 +121,16 @@ table Purchases
 
 	column source_file_name
 		dataType: string
+		isHidden
 		lineageTag: 3901cd38-6a18-4af3-ac73-7be1df11fc3a
 		sourceLineageTag: source_file_name
 		summarizeBy: none
 		sourceColumn: source_file_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_loaded_at
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 9e5e5b05-e5d3-4a35-9310-99ba0c58d3de
 		sourceLineageTag: source_loaded_at
@@ -143,9 +138,9 @@ table Purchases
 		sourceColumn: source_loaded_at
 
 		annotation SummarizationSetBy = Automatic
-
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: ae2ec402-27f5-45de-9265-ddaeaa7dc1a5
 		sourceLineageTag: created_at_utc

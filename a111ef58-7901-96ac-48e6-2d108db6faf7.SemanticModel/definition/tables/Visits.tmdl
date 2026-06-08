@@ -4,64 +4,64 @@ table Visits
 
 	column visit_date_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 8ff430a5-5295-41c6-8189-00e6b79e3438
 		sourceLineageTag: visit_date_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: visit_date_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column client_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 8d6d27b7-88fd-41bb-bdd1-b402254bf1c5
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column service_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: c297bc56-df39-4f27-9abd-ffe590b767d2
 		sourceLineageTag: service_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: service_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column staff_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 3bdaebe0-a1c2-45c8-b083-2392e806a7f5
 		sourceLineageTag: staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: staff_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column booked_by_staff_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: abd86b17-8e9e-460e-9ee2-e4a2188a5c69
 		sourceLineageTag: booked_by_staff_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: booked_by_staff_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column purchase_item_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 8f0043ef-4f7e-4879-b9ca-1381b08cc8d2
 		sourceLineageTag: purchase_item_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column attendance_status
 		dataType: string
 		lineageTag: 8ceaa6d5-f916-40c9-b861-3c317fa28d94
@@ -82,14 +82,14 @@ table Visits
 
 	column visit_count
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 5e2ddeab-a2b7-4e1a-9b0f-ca91b4db6a54
 		sourceLineageTag: visit_count
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: visit_count
 
 		annotation SummarizationSetBy = Automatic
-
 	column attended_flag
 		dataType: int64
 		formatString: 0
@@ -102,24 +102,25 @@ table Visits
 
 	column source_visit_id
 		dataType: string
+		isHidden
 		lineageTag: 2c2c968d-dd93-4587-bb36-78950a74ccc4
 		sourceLineageTag: source_visit_id
 		summarizeBy: none
 		sourceColumn: source_visit_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_file_name
 		dataType: string
+		isHidden
 		lineageTag: 4d9a8411-687b-48b3-a2ec-3252c0885c46
 		sourceLineageTag: source_file_name
 		summarizeBy: none
 		sourceColumn: source_file_name
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_loaded_at
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 40ffb716-38db-4858-9ea5-4caa4ab0e69d
 		sourceLineageTag: source_loaded_at
@@ -127,9 +128,9 @@ table Visits
 		sourceColumn: source_loaded_at
 
 		annotation SummarizationSetBy = Automatic
-
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: a12a525d-5f64-4557-b177-89986b7cbfae
 		sourceLineageTag: created_at_utc

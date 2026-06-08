@@ -4,41 +4,41 @@ table Client
 
 	column client_key
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 48ef05a7-8106-4d59-8867-9b6f0f02ccff
 		sourceLineageTag: client_key
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column silver_client_key
 		dataType: string
+		isHidden
 		lineageTag: b8745105-352c-49cd-98a8-02b84072e2c4
 		sourceLineageTag: silver_client_key
 		summarizeBy: none
 		sourceColumn: silver_client_key
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_client_id
 		dataType: string
+		isHidden
 		lineageTag: c213d8be-d158-4a6e-83ec-c85b8090cf15
 		sourceLineageTag: source_client_id
 		summarizeBy: none
 		sourceColumn: source_client_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column source_member_id
 		dataType: string
+		isHidden
 		lineageTag: e6431d20-913f-4e20-bc66-ab1644017377
 		sourceLineageTag: source_member_id
 		summarizeBy: none
 		sourceColumn: source_member_id
 
 		annotation SummarizationSetBy = Automatic
-
 	column client_name
 		dataType: string
 		lineageTag: e93f47d8-7ec7-4a9f-96a8-e9f535369c24
@@ -78,6 +78,7 @@ table Client
 
 	column created_at_utc
 		dataType: dateTime
+		isHidden
 		formatString: General Date
 		lineageTag: 859824f9-0177-419f-96a1-bae340809c90
 		sourceLineageTag: created_at_utc
