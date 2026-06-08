@@ -92,7 +92,7 @@ FACT_TIMECLOCK_TABLE = f"{GOLD_SCHEMA}.fact_timeclock"
 DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
 NOTEBOOK_NAME = "load_gold_data"
 
-VALID_LOAD_MODES = {"init", "refresh", "date_dim_only"}
+VALID_LOAD_MODES = {"init", "refresh", "date_dim_only", "client_dim_only"}
 CURRENT_TIMESTAMP_UTC = F.current_timestamp()
 DECIMAL_18_2 = T.DecimalType(18, 2)
 
@@ -403,11 +403,11 @@ require_columns(
 # CELL ********************
 
 # Rebuild mode: drop and recreate Gold objects from Silver.
-# date_dim_only intentionally refreshes only gold.dim_date and leaves all other
-# Gold tables untouched for metadata-safe date dimension updates.
+# date_dim_only and client_dim_only intentionally refresh only their target
+# dimensions and leave all other Gold tables untouched for metadata-safe updates.
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {GOLD_SCHEMA}")
 
-if load_mode != "date_dim_only":
+if load_mode not in {"date_dim_only", "client_dim_only"}:
     for table_name in [
         FACT_PURCHASE_TABLE,
         FACT_VISIT_TABLE,
@@ -526,6 +526,12 @@ dim_client_unknown_df = spark.createDataFrame(
     ),
 )
 dim_client_df = union_all([dim_client_unknown_df, dim_client_actual_df]).withColumn("created_at_utc", CURRENT_TIMESTAMP_UTC)
+
+if load_mode == "client_dim_only":
+    write_delta_table(dim_client_df, DIM_CLIENT_TABLE)
+    client_dim_count = spark.table(DIM_CLIENT_TABLE).count()
+    display(spark.table(DIM_CLIENT_TABLE).orderBy("client_key").limit(20))
+    exit_notebook(f"Refreshed {DIM_CLIENT_TABLE} only. Rows: {client_dim_count}.")
 
 
 # METADATA ********************
