@@ -56,36 +56,11 @@ table Date
 		formatString: 0
 		lineageTag: 8ad51744-3b35-48cd-bebf-43c639f057cc
 		sourceLineageTag: week_of_year
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: week_of_year
 
 
 		changedProperty = Name
-		annotation SummarizationSetBy = Automatic
-	column WeekStartDate
-		dataType: dateTime
-		formatString: General Date
-		lineageTag: 75ab43f2-037f-4542-8c80-73ec9fa71f15
-		sourceLineageTag: week_start_date
-		summarizeBy: none
-		sourceColumn: week_start_date
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column WeekOfYearLabel
-		dataType: string
-		lineageTag: 6eb68d3c-9a97-45ed-a84d-3793022ce25a
-		sourceLineageTag: week_of_year_label
-		sortByColumn: WeekStartDate
-		summarizeBy: none
-		sourceColumn: week_of_year_label
-
-		changedProperty = Name
-
-		changedProperty = SortByColumn
-
 		annotation SummarizationSetBy = Automatic
 	column Month
 		dataType: int64

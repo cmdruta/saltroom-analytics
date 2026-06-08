@@ -23,5 +23,4 @@ ref table 'Client Retention Snapshot'
 ref table Date
 ref table Staff
 ref table _Measures
-ref table dim_client_registration_date
 
