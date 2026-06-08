@@ -70,6 +70,18 @@ table Client
 
 		changedProperty = Name
 		annotation SummarizationSetBy = Automatic
+	column RegistrationDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 28e2457b-6ad9-43d1-b28c-eb587251c8b8
+		sourceLineageTag: registration_date_key
+		summarizeBy: none
+		sourceColumn: registration_date_key
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
 	column Zipcode
 		dataType: string
 		lineageTag: 1d22108d-fc91-4acc-b403-4756dcf63b79

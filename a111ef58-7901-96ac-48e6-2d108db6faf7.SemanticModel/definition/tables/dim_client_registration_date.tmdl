@@ -1,0 +1,85 @@
+table dim_client_registration_date
+	lineageTag: 7af56506-bd83-4f2f-926f-fec7e604734e
+	sourceLineageTag: [gold].[dim_date]
+
+	column DateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e4c5ebbf-c752-4bd1-8a5d-7a6bbccae9ed
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column CalendarDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 34b3b6cb-4d2e-40e0-84a1-bde3150addc2
+		sourceLineageTag: calendar_date
+		summarizeBy: none
+		sourceColumn: calendar_date
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekOfYear
+		dataType: int64
+		formatString: 0
+		lineageTag: 2ac0f9d5-0d5e-4e6f-9ee4-e55d6f69f334
+		sourceLineageTag: week_of_year
+		summarizeBy: none
+		sourceColumn: week_of_year
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekStartDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 905902c2-c3e7-4100-9fbc-21be427cb79b
+		sourceLineageTag: week_start_date
+		summarizeBy: none
+		sourceColumn: week_start_date
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekOfYearLabel
+		dataType: string
+		lineageTag: e2c3c12a-9856-466d-9059-dfc722b026bb
+		sourceLineageTag: week_of_year_label
+		sortByColumn: WeekStartDate
+		summarizeBy: none
+		sourceColumn: week_of_year_label
+
+		changedProperty = Name
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 4fb40988-1d0a-48b7-88af-bbf4e95647d2
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		changedProperty = Name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_client_registration_date = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			schemaName: gold
+			expressionSource: 'DirectLake - saltroom_lakehouse'

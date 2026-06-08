@@ -92,7 +92,7 @@ FACT_TIMECLOCK_TABLE = f"{GOLD_SCHEMA}.fact_timeclock"
 DQ_LOAD_WARNINGS_TABLE = "dq.load_warnings"
 NOTEBOOK_NAME = "load_gold_data"
 
-VALID_LOAD_MODES = {"init", "refresh"}
+VALID_LOAD_MODES = {"init", "refresh", "date_dim_only"}
 CURRENT_TIMESTAMP_UTC = F.current_timestamp()
 DECIMAL_18_2 = T.DecimalType(18, 2)
 
@@ -177,6 +177,18 @@ def write_delta_table(dataframe: DataFrame, table_name: str) -> None:
 
 def ensure_schema_exists(schema_name: str) -> None:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+
+
+def exit_notebook(message: str) -> None:
+    try:
+        mssparkutils.notebook.exit(message)
+    except NameError:
+        try:
+            from notebookutils import mssparkutils as fabric_mssparkutils
+
+            fabric_mssparkutils.notebook.exit(message)
+        except Exception:
+            raise SystemExit(message)
 
 
 def write_dq_result(
@@ -390,20 +402,23 @@ require_columns(
 
 # CELL ********************
 
-# Rebuild mode: drop and recreate all Gold objects from Silver.
+# Rebuild mode: drop and recreate Gold objects from Silver.
+# date_dim_only intentionally refreshes only gold.dim_date and leaves all other
+# Gold tables untouched for metadata-safe date dimension updates.
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {GOLD_SCHEMA}")
 
-for table_name in [
-    FACT_PURCHASE_TABLE,
-    FACT_VISIT_TABLE,
-    FACT_TIMECLOCK_TABLE,
-    DIM_PURCHASE_ITEM_TABLE,
-    DIM_STAFF_TABLE,
-    DIM_SERVICE_TABLE,
-    DIM_CLIENT_TABLE,
-    DIM_DATE_TABLE,
-]:
-    spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+if load_mode != "date_dim_only":
+    for table_name in [
+        FACT_PURCHASE_TABLE,
+        FACT_VISIT_TABLE,
+        FACT_TIMECLOCK_TABLE,
+        DIM_PURCHASE_ITEM_TABLE,
+        DIM_STAFF_TABLE,
+        DIM_SERVICE_TABLE,
+        DIM_CLIENT_TABLE,
+        DIM_DATE_TABLE,
+    ]:
+        spark.sql(f"DROP TABLE IF EXISTS {table_name}")
 
 
 # METADATA ********************
@@ -416,12 +431,13 @@ for table_name in [
 # CELL ********************
 
 # Dimension: Date
+client_registration_date_bounds_df = silver_clients_df.select(F.col("registration_date").cast("date").alias("calendar_date")).filter(F.col("calendar_date").isNotNull())
 purchase_date_bounds_df = silver_purchases_df.select(F.col("purchase_date").cast("date").alias("calendar_date")).filter(F.col("calendar_date").isNotNull())
 visit_date_bounds_df = silver_visits_df.select(F.col("visit_date").cast("date").alias("calendar_date")).filter(F.col("calendar_date").isNotNull())
 timeclock_date_bounds_df = silver_timeclock_df.select(F.col("work_date").cast("date").alias("calendar_date")).filter(F.col("calendar_date").isNotNull())
 
 date_bounds_row = (
-    union_all([purchase_date_bounds_df, visit_date_bounds_df, timeclock_date_bounds_df])
+    union_all([client_registration_date_bounds_df, purchase_date_bounds_df, visit_date_bounds_df, timeclock_date_bounds_df])
     .agg(F.min("calendar_date").alias("min_date"), F.max("calendar_date").alias("max_date"))
     .collect()[0]
 )
@@ -435,6 +451,10 @@ dim_date_df = (
         SELECT explode(sequence(to_date('{date_bounds_row["min_date"]}'), to_date('{date_bounds_row["max_date"]}'), interval 1 day)) AS calendar_date
         """
     )
+    .withColumn(
+        "week_start_date",
+        F.date_sub(F.col("calendar_date"), F.pmod(F.dayofweek("calendar_date") + F.lit(5), F.lit(7))),
+    )
     .select(
         F.date_format("calendar_date", "yyyyMMdd").cast("int").alias("date_key"),
         F.col("calendar_date"),
@@ -442,6 +462,8 @@ dim_date_df = (
         F.date_format("calendar_date", "EEEE").alias("day_name"),
         F.dayofweek("calendar_date").alias("day_of_week"),
         F.weekofyear("calendar_date").alias("week_of_year"),
+        F.col("week_start_date"),
+        F.date_format("week_start_date", "MMM dd, yy").alias("week_of_year_label"),
         F.month("calendar_date").alias("month"),
         F.date_format("calendar_date", "MMMM").alias("month_name"),
         F.quarter("calendar_date").alias("quarter"),
@@ -450,6 +472,12 @@ dim_date_df = (
         CURRENT_TIMESTAMP_UTC.alias("created_at_utc"),
     )
 )
+
+if load_mode == "date_dim_only":
+    write_delta_table(dim_date_df, DIM_DATE_TABLE)
+    date_dim_count = spark.table(DIM_DATE_TABLE).count()
+    display(spark.table(DIM_DATE_TABLE).orderBy("calendar_date").limit(20))
+    exit_notebook(f"Refreshed {DIM_DATE_TABLE} only. Rows: {date_dim_count}.")
 
 
 # METADATA ********************
@@ -471,6 +499,10 @@ dim_client_base_df = (
         F.coalesce(null_if_blank("client_full_name_clean"), null_if_blank("client")).alias("client_name"),
         null_if_blank("client_status").alias("client_status"),
         F.col("registration_date").cast("date").alias("registration_date"),
+        F.when(
+            F.col("registration_date").isNotNull(),
+            F.date_format(F.col("registration_date").cast("date"), "yyyyMMdd").cast("int"),
+        ).otherwise(F.lit(0)).alias("registration_date_key"),
         F.lit(None).cast("string").alias("zipcode"),
     )
     .dropDuplicates(["silver_client_key"])
@@ -478,7 +510,7 @@ dim_client_base_df = (
 
 dim_client_actual_df = add_surrogate_key(dim_client_base_df, "client_key", ["client_name", "silver_client_key"])
 dim_client_unknown_df = spark.createDataFrame(
-    [(0, None, None, None, "Unknown", None, None, None)],
+    [(0, None, None, None, "Unknown", None, None, 0, None)],
     schema=T.StructType(
         [
             T.StructField("client_key", T.IntegerType(), False),
@@ -488,6 +520,7 @@ dim_client_unknown_df = spark.createDataFrame(
             T.StructField("client_name", T.StringType(), True),
             T.StructField("client_status", T.StringType(), True),
             T.StructField("registration_date", T.DateType(), True),
+            T.StructField("registration_date_key", T.IntegerType(), False),
             T.StructField("zipcode", T.StringType(), True),
         ]
     ),
