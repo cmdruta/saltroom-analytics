@@ -1,209 +1,163 @@
-table Purchases
-	lineageTag: cc2d83a3-4669-45c8-b7cc-3ba123cee5f8
+table fact_purchase
+	lineageTag: 03eea276-5c4d-41b6-9b13-419580bc3a61
 	sourceLineageTag: [gold].[fact_purchase]
 
 	column purchase_date_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 432fafa6-ba9b-46c7-bb20-7019cf2c051e
+		lineageTag: 0e22e576-b155-4a0e-809a-1e1933570045
 		sourceLineageTag: purchase_date_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: purchase_date_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column client_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 64b90d32-2fa3-4ec1-83c7-c86f5a7e4a72
+		lineageTag: 24ea0885-4629-46bc-8d51-a3e3a0aa0f4b
 		sourceLineageTag: client_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: client_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column purchase_item_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 5b6bf44e-21d3-41f8-9896-a8b1ee264573
+		lineageTag: 54e29f1d-77cd-413e-a12e-260649fcdb3c
 		sourceLineageTag: purchase_item_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: purchase_item_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column sold_by_staff_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: f0ba294a-be8d-4b82-a620-85f14df8928f
+		lineageTag: 8e734093-3669-47e1-bb29-42d3e254053b
 		sourceLineageTag: sold_by_staff_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: sold_by_staff_key
 
-		changedProperty = IsHidden
-
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column source_purchase_item_id
 		dataType: string
-		isHidden
-		lineageTag: dfb645e4-689d-46de-956a-55fa80b4f160
+		lineageTag: 4e1838fa-822c-408e-9d8c-7b06438abb10
 		sourceLineageTag: source_purchase_item_id
 		summarizeBy: none
 		sourceColumn: source_purchase_item_id
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column gross_amount
 		dataType: double
-		lineageTag: b8fcb535-7234-490b-8de3-aa8bce7145dd
+		lineageTag: b2e646a3-223b-49e3-9517-c8c96af11414
 		sourceLineageTag: gross_amount
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: gross_amount
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column discount_amount
 		dataType: double
-		lineageTag: d706dd8f-a329-4cee-bcf8-8d08d6f520c4
+		lineageTag: 6863169b-2df1-4744-be0a-db302119938a
 		sourceLineageTag: discount_amount
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: discount_amount
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column net_sales_amount
 		dataType: double
-		lineageTag: 3fb5aa11-ac56-498e-8003-1c57dbdec665
+		lineageTag: b4155410-100c-427b-a86e-23652829fc1d
 		sourceLineageTag: net_sales_amount
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: net_sales_amount
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column tax_amount
 		dataType: double
-		lineageTag: b9598d52-fb49-4b3e-8c5b-f68fa5c2e18e
+		lineageTag: a404f570-3a9b-48e2-9d6e-f4ec03b3046f
 		sourceLineageTag: tax_amount
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: tax_amount
 
-		changedProperty = SummarizeBy
-
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column total_paid_amount
 		dataType: double
-		lineageTag: 20184c54-535e-44a1-9768-27a5eeeaa89b
+		lineageTag: ad4bc462-3e2b-433f-942a-b7216a691076
 		sourceLineageTag: total_paid_amount
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: total_paid_amount
 
-		changedProperty = SummarizeBy
-
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column quantity
 		dataType: int64
 		formatString: 0
-		lineageTag: 797af72f-306b-42d1-bed2-d5a316b195d0
+		lineageTag: d5a2d697-afb3-4673-948c-489b769804f3
 		sourceLineageTag: quantity
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: quantity
 
-		changedProperty = SummarizeBy
+		annotation SummarizationSetBy = Automatic
 
-		annotation SummarizationSetBy = User
-
-	column DiscountCode
+	column discount_code
 		dataType: string
-		lineageTag: d073e530-a74f-4223-a7cf-f4b43a6922d6
+		lineageTag: ce52a34a-1ce3-43af-ae16-2f7cf15dbe98
 		sourceLineageTag: discount_code
 		summarizeBy: none
 		sourceColumn: discount_code
-
-		changedProperty = Name
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_file_name
 		dataType: string
-		isHidden
-		lineageTag: fe39b7ba-925d-40eb-baa5-79db9f258a08
+		lineageTag: 3901cd38-6a18-4af3-ac73-7be1df11fc3a
 		sourceLineageTag: source_file_name
 		summarizeBy: none
 		sourceColumn: source_file_name
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_loaded_at
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: 534760b3-39a6-4bef-b01e-b3c195ffab01
+		lineageTag: 9e5e5b05-e5d3-4a35-9310-99ba0c58d3de
 		sourceLineageTag: source_loaded_at
 		summarizeBy: none
 		sourceColumn: source_loaded_at
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column created_at_utc
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: d7d2949f-b8dd-4ee4-9123-0a53deadd21f
+		lineageTag: ae2ec402-27f5-45de-9265-ddaeaa7dc1a5
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
 
-		changedProperty = IsHidden
-
 		annotation SummarizationSetBy = Automatic
 
-	partition Purchases = entity
+	partition fact_purchase = entity
 		mode: directLake
 		source
 			entityName: fact_purchase
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
-
-	changedProperty = Name
 

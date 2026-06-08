@@ -1,126 +1,99 @@
-table Timeclock
-	lineageTag: 3c19f3c7-516c-4831-93cd-e34b73a51113
+table fact_timeclock
+	lineageTag: a2b08888-8d07-44b5-a070-7dfc59317690
 	sourceLineageTag: [gold].[fact_timeclock]
 
 	column work_date_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 2d319d9e-3001-48c4-b7dd-4d5a6a6d33c7
+		lineageTag: 9bd918d4-27b9-448c-995d-629a3bfba653
 		sourceLineageTag: work_date_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: work_date_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column staff_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: d6aea0c3-693c-4adf-88e2-e61f44c8f07e
+		lineageTag: 4623de10-a922-4185-9c92-41f12cd65917
 		sourceLineageTag: staff_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: staff_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column hours_worked
 		dataType: double
-		lineageTag: 5517db67-add7-47f1-94cc-95e00848d2e4
+		lineageTag: 880b570f-21cb-43c5-a7f9-db6515c68999
 		sourceLineageTag: hours_worked
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: hours_worked
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column shift_count
 		dataType: int64
 		formatString: 0
-		lineageTag: 2bda9ef0-b9bf-42e9-9c51-92bc9aa8d841
+		lineageTag: b920faa4-cc60-4e0b-9458-b0878a204e5c
 		sourceLineageTag: shift_count
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: shift_count
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column source_timeclock_record_id
 		dataType: string
-		isHidden
-		lineageTag: 5c6acbf7-47f9-425f-b12b-e96d021ca912
+		lineageTag: a23399a3-053d-439e-8875-6231a6fb8706
 		sourceLineageTag: source_timeclock_record_id
 		summarizeBy: none
 		sourceColumn: source_timeclock_record_id
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_row_hash
 		dataType: string
-		isHidden
-		lineageTag: 80d7c2ce-4890-4ff0-ae72-afe0b490da2e
+		lineageTag: 4ee88520-63d2-403f-8a42-c4477741a4a2
 		sourceLineageTag: source_row_hash
 		summarizeBy: none
 		sourceColumn: source_row_hash
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_file_name
 		dataType: string
-		isHidden
-		lineageTag: 14b1a4c0-aeca-451f-b2e2-138b7102a219
+		lineageTag: 33dd7529-3861-444b-86b1-cf4f4615d1fc
 		sourceLineageTag: source_file_name
 		summarizeBy: none
 		sourceColumn: source_file_name
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_loaded_at
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: 8aebe181-8eb6-4d1e-ab38-68288b711cc7
+		lineageTag: 43914f2a-2db6-40a9-8d73-d8e155713ad9
 		sourceLineageTag: source_loaded_at
 		summarizeBy: none
 		sourceColumn: source_loaded_at
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column created_at_utc
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: 8136180f-e205-41c8-aa1b-85d6dd03df27
+		lineageTag: 04b642ae-853d-4180-bd41-28f830c93aa4
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
 
-		changedProperty = IsHidden
-
 		annotation SummarizationSetBy = Automatic
 
-	partition Timeclock = entity
+	partition fact_timeclock = entity
 		mode: directLake
 		source
 			entityName: fact_timeclock
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
-
-	changedProperty = Name
 

@@ -1,11 +1,11 @@
-table 'Client Retention Snapshot'
-	lineageTag: 3fb98aa8-9f33-4f26-9f8c-77d085295631
+table client_retention_snapshot
+	lineageTag: 0f93e374-aa34-4280-b3f4-fe2b43d39e2d
 	sourceLineageTag: [gold].[client_retention_snapshot]
 
 	column snapshot_date
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: cec82895-d37b-4293-97c6-dd073ede22c6
+		lineageTag: 40518a0a-7980-4268-b8c2-8b50700081d3
 		sourceLineageTag: snapshot_date
 		summarizeBy: none
 		sourceColumn: snapshot_date
@@ -14,47 +14,36 @@ table 'Client Retention Snapshot'
 
 	column batch_id
 		dataType: string
-		isHidden
-		lineageTag: d328044e-a644-41e6-93b5-cde3273b3c80
+		lineageTag: 6478f4e3-7f59-457e-8432-1067b8efa43b
 		sourceLineageTag: batch_id
 		summarizeBy: none
 		sourceColumn: batch_id
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column client_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 736514d0-029c-4e89-98a4-510c7a673fee
+		lineageTag: 0d9d5cef-45bc-496a-abfc-7260b7816daf
 		sourceLineageTag: client_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: client_key
 
-		changedProperty = IsHidden
-
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column client_name
 		dataType: string
-		isHidden
-		lineageTag: 5dcb9d80-d2b0-4a3d-89ff-79fff0e531d6
+		lineageTag: eb25f528-3f33-4a84-81ca-2454e24673e9
 		sourceLineageTag: client_name
 		summarizeBy: none
 		sourceColumn: client_name
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column last_visit_date
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: 0a7dea84-41d9-49d6-8045-5a1283b71201
+		lineageTag: e5c8432a-f358-4367-b7de-eb5901701592
 		sourceLineageTag: last_visit_date
 		summarizeBy: none
 		sourceColumn: last_visit_date
@@ -64,146 +53,116 @@ table 'Client Retention Snapshot'
 	column days_since_last_visit
 		dataType: int64
 		formatString: 0
-		lineageTag: 516d9c16-bcc1-4bdb-bd76-fb8399a2832a
+		lineageTag: fb4f32ce-7a85-4fe5-b186-5028ba5a372a
 		sourceLineageTag: days_since_last_visit
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: days_since_last_visit
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column lifetime_visits
 		dataType: int64
 		formatString: 0
-		lineageTag: 322100d3-abd6-4f7d-9a8c-b2b17ffde2bc
+		lineageTag: bdfcf2ae-ba10-438d-abea-015c00283b20
 		sourceLineageTag: lifetime_visits
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: lifetime_visits
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column visits_last_30_days
 		dataType: int64
 		formatString: 0
-		lineageTag: 16ae789f-3c89-484e-8c66-5943e85bfcc8
+		lineageTag: 306b270b-3570-4f08-962f-51321bedd05a
 		sourceLineageTag: visits_last_30_days
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: visits_last_30_days
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column visits_last_60_days
 		dataType: int64
 		formatString: 0
-		lineageTag: 278971a2-3c6c-42d2-ad93-d61b3204414c
+		lineageTag: c43d83a2-1687-4ef5-88ee-4b25b24de81d
 		sourceLineageTag: visits_last_60_days
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: visits_last_60_days
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column visits_last_90_days
 		dataType: int64
 		formatString: 0
-		lineageTag: 447855e9-d953-4955-90d5-56ce5f270281
+		lineageTag: bb5c51ca-f3e4-478c-949b-db4f8fda1d34
 		sourceLineageTag: visits_last_90_days
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: visits_last_90_days
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column lifetime_revenue
 		dataType: double
-		lineageTag: 9f84f4dd-58ad-4c98-8309-e601d9ca1165
+		lineageTag: 3240e403-2c69-4e8d-b73c-b0dd18312f13
 		sourceLineageTag: lifetime_revenue
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: lifetime_revenue
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column revenue_last_90_days
 		dataType: double
-		lineageTag: b5192eab-3770-4458-80b5-0b4674e91ef9
+		lineageTag: 37c8ae47-4bf2-4166-8281-770cce5bcc2c
 		sourceLineageTag: revenue_last_90_days
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: revenue_last_90_days
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column last_service_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 715caf9c-5f94-4669-8ad6-a1a655e859ae
+		lineageTag: c7049145-ba77-4c0d-af2a-9dc1fb61f334
 		sourceLineageTag: last_service_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: last_service_key
 
-		changedProperty = IsHidden
-
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column last_service_name
 		dataType: string
-		isHidden
-		lineageTag: 19601267-7268-49c6-8678-8b69b936f8c4
+		lineageTag: 2fed6cff-8454-4624-bda5-2e8bd86b4fc1
 		sourceLineageTag: last_service_name
 		summarizeBy: none
 		sourceColumn: last_service_name
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column last_purchase_item_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: fdc6bbd7-9d64-40f5-91e1-57c85ec37ae0
+		lineageTag: 0916fcc8-e1d8-479e-b39a-30e838703f9a
 		sourceLineageTag: last_purchase_item_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: last_purchase_item_key
 
-		changedProperty = IsHidden
-
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column last_purchase_item_name
 		dataType: string
-		isHidden
-		lineageTag: 8e033a28-35af-4ca3-bb46-890f6afa05d6
+		lineageTag: aa288cd0-2e86-462e-bb22-a34012774326
 		sourceLineageTag: last_purchase_item_name
 		summarizeBy: none
 		sourceColumn: last_purchase_item_name
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column last_discount_code
 		dataType: string
-		lineageTag: b5c45bbd-5837-426d-a81b-476f7f1ad393
+		lineageTag: 4532db8e-495c-4a83-8731-59c49c5dcf7f
 		sourceLineageTag: last_discount_code
 		summarizeBy: none
 		sourceColumn: last_discount_code
@@ -212,7 +171,7 @@ table 'Client Retention Snapshot'
 
 	column retention_status
 		dataType: string
-		lineageTag: 162a3224-f49c-49e6-afa4-2f6ddaae2cae
+		lineageTag: 36674698-63a5-4442-ae6e-f106054fded1
 		sourceLineageTag: retention_status
 		summarizeBy: none
 		sourceColumn: retention_status
@@ -221,7 +180,7 @@ table 'Client Retention Snapshot'
 
 	column retention_priority
 		dataType: string
-		lineageTag: 56356616-e884-442f-88f4-5cf9b418e44b
+		lineageTag: 23c6b142-137c-4276-b113-455155d53f7b
 		sourceLineageTag: retention_priority
 		summarizeBy: none
 		sourceColumn: retention_priority
@@ -230,7 +189,7 @@ table 'Client Retention Snapshot'
 
 	column recommended_action
 		dataType: string
-		lineageTag: ed384149-6045-48df-8133-6531d695a6b2
+		lineageTag: 7b4d65dd-06c8-4c3e-bc29-5bb9097682fa
 		sourceLineageTag: recommended_action
 		summarizeBy: none
 		sourceColumn: recommended_action
@@ -239,36 +198,28 @@ table 'Client Retention Snapshot'
 
 	column created_at_utc
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: 0d93e85d-02ba-49ee-9f64-5b096156f50f
+		lineageTag: 1a8398be-6c2d-40dd-8afc-092b08c699da
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column updated_at_utc
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: bad2c832-53e0-4081-8255-aee2f1c6247a
+		lineageTag: 0fb7034f-a081-4ab1-bca2-6c837d124d65
 		sourceLineageTag: updated_at_utc
 		summarizeBy: none
 		sourceColumn: updated_at_utc
 
-		changedProperty = IsHidden
-
 		annotation SummarizationSetBy = Automatic
 
-	partition 'Client Retention Snapshot' = entity
+	partition client_retention_snapshot = entity
 		mode: directLake
 		source
 			entityName: client_retention_snapshot
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
-
-	changedProperty = Name
 

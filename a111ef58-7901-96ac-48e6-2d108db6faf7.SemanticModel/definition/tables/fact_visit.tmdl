@@ -1,201 +1,147 @@
-/// All rows represent attended visits. No-show and late-cancel analysis is not currently supported.
-table Visits
-	lineageTag: b153da59-1480-4998-9bc8-fb65b2bf4263
+table fact_visit
+	lineageTag: 003d92d0-92ff-4df4-952b-b78fb0877522
 	sourceLineageTag: [gold].[fact_visit]
 
 	column visit_date_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: b7c88e59-bfbc-4879-8bf6-419a0ea09a1b
+		lineageTag: 8ff430a5-5295-41c6-8189-00e6b79e3438
 		sourceLineageTag: visit_date_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: visit_date_key
 
-		changedProperty = SummarizeBy
-
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column client_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: f4124539-4068-4c48-bf9e-eebdb16ec7a5
+		lineageTag: 8d6d27b7-88fd-41bb-bdd1-b402254bf1c5
 		sourceLineageTag: client_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: client_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column service_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 79a0a65c-d2a2-4cd5-860f-339d54831457
+		lineageTag: c297bc56-df39-4f27-9abd-ffe590b767d2
 		sourceLineageTag: service_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: service_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column staff_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 1432b43d-9239-4a07-b061-0495c87869cd
+		lineageTag: 3bdaebe0-a1c2-45c8-b083-2392e806a7f5
 		sourceLineageTag: staff_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: staff_key
 
-		changedProperty = IsHidden
-
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column booked_by_staff_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: fd08573f-55ea-4026-8f6e-b868b6421c9f
+		lineageTag: abd86b17-8e9e-460e-9ee2-e4a2188a5c69
 		sourceLineageTag: booked_by_staff_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: booked_by_staff_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column purchase_item_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 76256921-b3f9-49c6-997e-6a5b5edd5770
+		lineageTag: 8f0043ef-4f7e-4879-b9ca-1381b08cc8d2
 		sourceLineageTag: purchase_item_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: purchase_item_key
 
-		changedProperty = IsHidden
+		annotation SummarizationSetBy = Automatic
 
-		changedProperty = SummarizeBy
-
-		annotation SummarizationSetBy = User
-
-	column AttendanceStatus
+	column attendance_status
 		dataType: string
-		lineageTag: 0371473e-6072-42b2-83e1-5e096e0d305b
+		lineageTag: 8ceaa6d5-f916-40c9-b861-3c317fa28d94
 		sourceLineageTag: attendance_status
 		summarizeBy: none
 		sourceColumn: attendance_status
 
-		changedProperty = Name
-
 		annotation SummarizationSetBy = Automatic
 
-	column BookingSource
+	column booking_source
 		dataType: string
-		lineageTag: dbdc8dce-f395-4fac-b885-0e95328a682d
+		lineageTag: dd49a403-78ce-44dd-896c-f5424e8c5f94
 		sourceLineageTag: booking_source
 		summarizeBy: none
 		sourceColumn: booking_source
-
-		changedProperty = Name
 
 		annotation SummarizationSetBy = Automatic
 
 	column visit_count
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 1fec7b2b-dd15-471c-8e72-778de81be72c
+		lineageTag: 5e2ddeab-a2b7-4e1a-9b0f-ca91b4db6a54
 		sourceLineageTag: visit_count
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: visit_count
 
-		changedProperty = SummarizeBy
+		annotation SummarizationSetBy = Automatic
 
-		changedProperty = IsHidden
-
-		annotation SummarizationSetBy = User
-
-	column AttendedFlag
+	column attended_flag
 		dataType: int64
 		formatString: 0
-		lineageTag: 7cef36fc-c468-4de1-9d13-eb3c58e1c7fa
+		lineageTag: 4b85e26a-df4a-4b3b-a195-a37f88edd2e5
 		sourceLineageTag: attended_flag
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: attended_flag
 
-		changedProperty = SummarizeBy
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = User
+		annotation SummarizationSetBy = Automatic
 
 	column source_visit_id
 		dataType: string
-		isHidden
-		lineageTag: 1f466a9a-76ac-4a74-85e2-99322734e03a
+		lineageTag: 2c2c968d-dd93-4587-bb36-78950a74ccc4
 		sourceLineageTag: source_visit_id
 		summarizeBy: none
 		sourceColumn: source_visit_id
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_file_name
 		dataType: string
-		isHidden
-		lineageTag: 7c7d9f6b-3c7b-44f8-95f1-dc664e8d979e
+		lineageTag: 4d9a8411-687b-48b3-a2ec-3252c0885c46
 		sourceLineageTag: source_file_name
 		summarizeBy: none
 		sourceColumn: source_file_name
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_loaded_at
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: 812d6707-98b5-4238-8554-2094ff4426bc
+		lineageTag: 40ffb716-38db-4858-9ea5-4caa4ab0e69d
 		sourceLineageTag: source_loaded_at
 		summarizeBy: none
 		sourceColumn: source_loaded_at
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column created_at_utc
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: 1b14f76a-deae-4350-8884-907589587c09
+		lineageTag: a12a525d-5f64-4557-b177-89986b7cbfae
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
 
-		changedProperty = IsHidden
-
 		annotation SummarizationSetBy = Automatic
 
-	partition Visits = entity
+	partition fact_visit = entity
 		mode: directLake
 		source
 			entityName: fact_visit
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
-
-	changedProperty = Name
-
-	changedProperty = Description
 

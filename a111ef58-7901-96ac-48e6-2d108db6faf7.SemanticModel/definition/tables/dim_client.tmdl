@@ -1,120 +1,95 @@
-table Client
-	lineageTag: 8dbeb4fe-cee9-4b40-9e33-c7d8aa714093
+table dim_client
+	lineageTag: 2ce75404-d2ce-486a-8213-3eebc885dd1b
 	sourceLineageTag: [gold].[dim_client]
 
 	column client_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: d1822aa5-cb0c-4eca-b547-1fed8969d713
+		lineageTag: 48ef05a7-8106-4d59-8867-9b6f0f02ccff
 		sourceLineageTag: client_key
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: client_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column silver_client_key
 		dataType: string
-		isHidden
-		lineageTag: e2dcc8fc-1a4a-4460-a1a2-5a0ed8f6fa2d
+		lineageTag: b8745105-352c-49cd-98a8-02b84072e2c4
 		sourceLineageTag: silver_client_key
 		summarizeBy: none
 		sourceColumn: silver_client_key
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_client_id
 		dataType: string
-		isHidden
-		lineageTag: 2f30a1a1-26d1-47ed-afad-979f860e00dc
+		lineageTag: c213d8be-d158-4a6e-83ec-c85b8090cf15
 		sourceLineageTag: source_client_id
 		summarizeBy: none
 		sourceColumn: source_client_id
-
-		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
 	column source_member_id
 		dataType: string
-		isHidden
-		lineageTag: 40983b62-c3dd-46e4-b9cd-3396897fea5b
+		lineageTag: e6431d20-913f-4e20-bc66-ab1644017377
 		sourceLineageTag: source_member_id
 		summarizeBy: none
 		sourceColumn: source_member_id
 
-		changedProperty = IsHidden
-
 		annotation SummarizationSetBy = Automatic
 
-	column Client
+	column client_name
 		dataType: string
-		lineageTag: 941d64ca-1397-4a9e-adb3-c93e56a34069
+		lineageTag: e93f47d8-7ec7-4a9f-96a8-e9f535369c24
 		sourceLineageTag: client_name
 		summarizeBy: none
 		sourceColumn: client_name
 
-		changedProperty = Name
-
 		annotation SummarizationSetBy = Automatic
 
-	column ClientStatus
+	column client_status
 		dataType: string
-		lineageTag: 67067a20-0640-4f6a-9fe5-7c03c0debbb5
+		lineageTag: 73198ab8-a022-49e4-a6fc-f13f2e13db93
 		sourceLineageTag: client_status
 		summarizeBy: none
 		sourceColumn: client_status
 
-		changedProperty = Name
-
 		annotation SummarizationSetBy = Automatic
 
-	column RegistrationDate
+	column registration_date
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: e083341d-4e1c-476a-a38f-6e67fc0f465c
+		lineageTag: a4c09a94-d3cb-4e53-a04b-a5942a637b47
 		sourceLineageTag: registration_date
 		summarizeBy: none
 		sourceColumn: registration_date
 
-		changedProperty = Name
-
 		annotation SummarizationSetBy = Automatic
 
-	column Zipcode
+	column zipcode
 		dataType: string
-		lineageTag: f56f7b48-1b96-49ab-9e79-3eff66e0490c
+		lineageTag: 1d22108d-fc91-4acc-b403-4756dcf63b79
 		sourceLineageTag: zipcode
 		summarizeBy: none
 		sourceColumn: zipcode
-
-		changedProperty = Name
 
 		annotation SummarizationSetBy = Automatic
 
 	column created_at_utc
 		dataType: dateTime
-		isHidden
 		formatString: General Date
-		lineageTag: fd006c98-bc43-4393-a79f-e6ccc1393fe5
+		lineageTag: 859824f9-0177-419f-96a1-bae340809c90
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
 
-		changedProperty = IsHidden
-
 		annotation SummarizationSetBy = Automatic
 
-	partition Client = entity
+	partition dim_client = entity
 		mode: directLake
 		source
 			entityName: dim_client
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
-
-	changedProperty = Name
 
