@@ -1,4 +1,4 @@
-table dim_staff
+table Staff
 	lineageTag: c412e797-faca-406a-94eb-264ef9297da2
 	sourceLineageTag: [gold].[dim_staff]
 
@@ -40,10 +40,12 @@ table dim_staff
 
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_staff = entity
+	partition Staff = entity
 		mode: directLake
 		source
 			entityName: dim_staff
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

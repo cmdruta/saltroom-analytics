@@ -1,4 +1,4 @@
-table fact_visit
+table Visits
 	lineageTag: 003d92d0-92ff-4df4-952b-b78fb0877522
 	sourceLineageTag: [gold].[fact_visit]
 
@@ -138,10 +138,12 @@ table fact_visit
 
 		annotation SummarizationSetBy = Automatic
 
-	partition fact_visit = entity
+	partition Visits = entity
 		mode: directLake
 		source
 			entityName: fact_visit
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

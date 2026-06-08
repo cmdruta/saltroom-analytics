@@ -1,4 +1,4 @@
-table dim_purchase_item
+table 'Purchase Item'
 	lineageTag: 15a369cc-7c58-4cfe-a05d-8f914e4b5dda
 	sourceLineageTag: [gold].[dim_purchase_item]
 
@@ -40,10 +40,12 @@ table dim_purchase_item
 
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_purchase_item = entity
+	partition 'Purchase Item' = entity
 		mode: directLake
 		source
 			entityName: dim_purchase_item
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

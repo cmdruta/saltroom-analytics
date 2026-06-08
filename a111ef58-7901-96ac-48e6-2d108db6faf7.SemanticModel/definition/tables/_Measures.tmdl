@@ -1,57 +1,57 @@
 table _Measures
 	lineageTag: 7946bf90-1711-462e-b681-d32859e3598f
 
-	measure Discounts = SUM(fact_purchase[discount_amount])
+	measure Discounts = SUM(Purchases[discount_amount])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
 		lineageTag: ff034261-70e5-467f-894a-f5db94dc9644
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
-	measure 'Gross Sales' = SUM(fact_purchase[gross_amount])
+	measure 'Gross Sales' = SUM(Purchases[gross_amount])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
 		lineageTag: 6327558a-7837-4b27-b7ad-276b4610fbd3
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
-	measure 'Quantity Sold' = SUM(fact_purchase[quantity])
+	measure 'Quantity Sold' = SUM(Purchases[quantity])
 		formatString: 0
 		isHidden
 		displayFolder: Revenue
 		lineageTag: 4584f0b4-3238-4751-a900-0319b67b1f82
 
-	measure 'Hours Worked' = SUM(fact_timeclock[hours_worked])
+	measure 'Hours Worked' = SUM(Timeclock[hours_worked])
 		displayFolder: Staff
 		lineageTag: 537f2777-199d-40c5-8ca5-9976508f6483
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Total Visits' = COUNTROWS(fact_visit)
+	measure 'Total Visits' = COUNTROWS(Visits)
 		formatString: 0
 		displayFolder: Client
 		lineageTag: 21d19fa8-a5e5-4270-9618-9eaa9398c15a
 
-	measure 'Avg Sale Amount' = DIVIDE([Net Revenue], COUNTROWS(fact_purchase))
+	measure 'Avg Sale Amount' = DIVIDE([Net Revenue], COUNTROWS(Purchases))
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
 		lineageTag: 14c31a06-cc28-41ee-98e9-8aca387277da
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
-	measure 'Visits per Client' = DIVIDE([Total Visits], DISTINCTCOUNT(dim_client[client_key]))
+	measure 'Visits per Client' = DIVIDE([Total Visits], DISTINCTCOUNT(Client[client_key]))
 		displayFolder: Visits
 		lineageTag: 22276df7-df73-4e28-986c-457a2681590a
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Visits per Day' = DIVIDE(COUNTROWS(fact_visit), DISTINCTCOUNT(dim_date[date_key]))
+	measure 'Visits per Day' = DIVIDE(COUNTROWS(Visits), DISTINCTCOUNT('Date'[date_key]))
 		displayFolder: Visits
 		lineageTag: 86365179-c22b-4b55-8b39-c65c69feca1e
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Visits per Service' = DIVIDE(COUNTROWS(fact_visit), DISTINCTCOUNT(dim_service[service_key]))
+	measure 'Visits per Service' = DIVIDE(COUNTROWS(Visits), DISTINCTCOUNT(Service[service_key]))
 		displayFolder: Visits
 		lineageTag: 658100e9-c0e3-4be2-a065-37d801be9b8d
 
@@ -60,18 +60,18 @@ table _Measures
 	measure 'New Registered Clients' =
 			
 			CALCULATE(
-			    DISTINCTCOUNT(fact_visit[client_key]),
+			    DISTINCTCOUNT(Visits[client_key]),
 			    FILTER(
-			        fact_visit,
-			        RELATED(dim_client[registration_date]) >= MIN(dim_date[calendar_date]) &&
-			        RELATED(dim_client[registration_date]) <= MAX(dim_date[calendar_date])
+			        Visits,
+			        RELATED(Client[registration_date]) >= MIN('Date'[calendar_date]) &&
+			        RELATED(Client[registration_date]) <= MAX('Date'[calendar_date])
 			    )
 			)
 		formatString: 0
 		displayFolder: Client
 		lineageTag: 5f940b0f-46c8-4683-838b-f27ef253d666
 
-	measure 'Total Clients' = DISTINCTCOUNT(fact_visit[client_key])
+	measure 'Total Clients' = DISTINCTCOUNT(Visits[client_key])
 		formatString: 0
 		displayFolder: Client
 		lineageTag: dec9a472-8f65-4d17-89d4-0ea338cc1faa
@@ -84,17 +84,17 @@ table _Measures
 	measure 'New Clients' =
 			
 			VAR PeriodStart =
-			    MIN(dim_date[calendar_date])
+			    MIN('Date'[calendar_date])
 			VAR PeriodEnd =
-			    MAX(dim_date[calendar_date])
+			    MAX('Date'[calendar_date])
 			RETURN
 			COUNTROWS(
 			    FILTER(
-			        VALUES(fact_visit[client_key]),
+			        VALUES(Visits[client_key]),
 			        VAR FirstVisitDate =
 			            CALCULATE(
-			                MIN(dim_date[calendar_date]),
-			                REMOVEFILTERS(dim_date)
+			                MIN('Date'[calendar_date]),
+			                REMOVEFILTERS('Date')
 			            )
 			        RETURN
 			            FirstVisitDate >= PeriodStart
@@ -107,7 +107,7 @@ table _Measures
 
 	measure 'Net Revenue' =
 			
-			SUM(fact_purchase[net_sales_amount])
+			SUM(Purchases[net_sales_amount])
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
 		lineageTag: 3705f260-8206-41f6-8330-e40c76d20d66
@@ -116,7 +116,7 @@ table _Measures
 
 	measure 'Transaction Count' =
 			
-			COUNTROWS(fact_purchase)
+			COUNTROWS(Purchases)
 		formatString: 0
 		isHidden
 		lineageTag: d01855b2-c4cd-4936-b6f1-7f4b242c9422
@@ -143,7 +143,7 @@ table _Measures
 			
 			DIVIDE(
 			    [Net Revenue],
-			    DISTINCTCOUNT(fact_purchase[client_key])
+			    DISTINCTCOUNT(Purchases[client_key])
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -155,7 +155,7 @@ table _Measures
 			
 			DIVIDE(
 			    [Net Revenue],
-			    DISTINCTCOUNT(dim_date[calendar_date])
+			    DISTINCTCOUNT('Date'[calendar_date])
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -179,7 +179,7 @@ table _Measures
 
 	measure 'Total Purchasing Clients' =
 			
-			DISTINCTCOUNT(fact_purchase[client_key])
+			DISTINCTCOUNT(Purchases[client_key])
 		formatString: 0
 		displayFolder: Client
 		lineageTag: 54eedf42-07ce-4e77-b283-06e730788ac5
@@ -197,7 +197,7 @@ table _Measures
 			
 			CALCULATE(
 			    [Net Revenue],
-			    dim_purchase_item[revenue_category] = "Membership"
+			    'Purchase Item'[revenue_category] = "Membership"
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -209,7 +209,7 @@ table _Measures
 			
 			CALCULATE(
 			    [Net Revenue],
-			    dim_purchase_item[revenue_category] = "Gift Card"
+			    'Purchase Item'[revenue_category] = "Gift Card"
 			)
 		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
 		displayFolder: Revenue
@@ -220,7 +220,7 @@ table _Measures
 	measure 'Avg Ticket per Visit' =
 			
 			AVERAGEX(
-			    VALUES(fact_visit[purchase_item_key]),
+			    VALUES(Visits[purchase_item_key]),
 			    CALCULATE([Net Revenue])
 			)
 		displayFolder: Visits
@@ -232,7 +232,7 @@ table _Measures
 			
 			DIVIDE(
 			    [Net Revenue],
-			    DISTINCTCOUNT(fact_purchase[client_key])
+			    DISTINCTCOUNT(Purchases[client_key])
 			)
 		displayFolder: Visits
 		lineageTag: 9abf1ed9-abe6-440c-b81b-b17a7a0e219b
@@ -243,7 +243,7 @@ table _Measures
 			
 			CALCULATE (
 			    [Retention Snapshot Clients],
-			    client_retention_snapshot[retention_status] = "At Risk"
+			    'Client Retention Snapshot'[retention_status] = "At Risk"
 			)
 		formatString: #,0
 		displayFolder: Retention
@@ -253,7 +253,7 @@ table _Measures
 			
 			CALCULATE (
 			    [Retention Snapshot Clients],
-			    client_retention_snapshot[retention_status] = "Lost"
+			    'Client Retention Snapshot'[retention_status] = "Lost"
 			)
 		formatString: #,0
 		displayFolder: Retention
@@ -261,7 +261,7 @@ table _Measures
 
 	measure 'Retention Snapshot Clients' =
 			
-			DISTINCTCOUNT ( client_retention_snapshot[client_key] )
+			DISTINCTCOUNT ( 'Client Retention Snapshot'[client_key] )
 		formatString: #,0
 		displayFolder: Retention
 		lineageTag: 78d2fc29-881e-4575-8d42-9233e3c5c29e
@@ -269,8 +269,8 @@ table _Measures
 	measure 'Revenue at Risk' =
 			
 			CALCULATE (
-			    SUM ( client_retention_snapshot[lifetime_revenue] ),
-			    client_retention_snapshot[retention_priority] = "High"
+			    SUM ( 'Client Retention Snapshot'[lifetime_revenue] ),
+			    'Client Retention Snapshot'[retention_priority] = "High"
 			)
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Retention
@@ -282,7 +282,7 @@ table _Measures
 			
 			CALCULATE (
 			    [Retention Snapshot Clients],
-			    client_retention_snapshot[retention_status] = "Slipping"
+			    'Client Retention Snapshot'[retention_status] = "Slipping"
 			)
 		formatString: #,0
 		displayFolder: Retention
@@ -291,8 +291,8 @@ table _Measures
 	measure 'Active Clients' =
 			
 			CALCULATE(
-			    DISTINCTCOUNT(client_retention_snapshot[client_key]),
-			    client_retention_snapshot[retention_status] = "Active"
+			    DISTINCTCOUNT('Client Retention Snapshot'[client_key]),
+			    'Client Retention Snapshot'[retention_status] = "Active"
 			)
 		formatString: #,0
 		displayFolder: Retention
@@ -301,8 +301,8 @@ table _Measures
 	measure 'Never Visited' =
 			
 			CALCULATE(
-			    DISTINCTCOUNT(client_retention_snapshot[client_key]),
-			    client_retention_snapshot[retention_status] = "Never Visited"
+			    DISTINCTCOUNT('Client Retention Snapshot'[client_key]),
+			    'Client Retention Snapshot'[retention_status] = "Never Visited"
 			)
 		formatString: #,0
 		displayFolder: Retention
@@ -323,3 +323,4 @@ table _Measures
 		source = { 0 }
 
 	annotation PBI_Id = 5fc7bc5fd255419eb059bedb214d9892
+

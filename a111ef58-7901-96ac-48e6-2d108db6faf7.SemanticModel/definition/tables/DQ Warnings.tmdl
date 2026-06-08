@@ -1,4 +1,4 @@
-table gold_dq_warnings
+table 'DQ Warnings'
 	lineageTag: cde9f46a-5b74-4f73-8372-5acb06aa7ad4
 	sourceLineageTag: [gold].[gold_dq_warnings]
 
@@ -76,10 +76,12 @@ table gold_dq_warnings
 
 		annotation SummarizationSetBy = Automatic
 
-	partition gold_dq_warnings = entity
+	partition 'DQ Warnings' = entity
 		mode: directLake
 		source
 			entityName: gold_dq_warnings
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

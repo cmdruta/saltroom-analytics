@@ -1,4 +1,4 @@
-table dim_date
+table Date
 	lineageTag: 52dd96f5-6f40-4f32-8f02-fc39e7a5848a
 	sourceLineageTag: [gold].[dim_date]
 
@@ -120,10 +120,12 @@ table dim_date
 
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_date = entity
+	partition Date = entity
 		mode: directLake
 		source
 			entityName: dim_date
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

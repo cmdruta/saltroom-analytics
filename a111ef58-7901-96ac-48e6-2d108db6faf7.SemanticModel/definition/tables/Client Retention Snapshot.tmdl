@@ -1,4 +1,4 @@
-table client_retention_snapshot
+table 'Client Retention Snapshot'
 	lineageTag: 0f93e374-aa34-4280-b3f4-fe2b43d39e2d
 	sourceLineageTag: [gold].[client_retention_snapshot]
 
@@ -216,10 +216,12 @@ table client_retention_snapshot
 
 		annotation SummarizationSetBy = Automatic
 
-	partition client_retention_snapshot = entity
+	partition 'Client Retention Snapshot' = entity
 		mode: directLake
 		source
 			entityName: client_retention_snapshot
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

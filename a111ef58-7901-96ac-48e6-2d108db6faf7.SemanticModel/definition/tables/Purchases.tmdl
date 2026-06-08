@@ -1,4 +1,4 @@
-table fact_purchase
+table Purchases
 	lineageTag: 03eea276-5c4d-41b6-9b13-419580bc3a61
 	sourceLineageTag: [gold].[fact_purchase]
 
@@ -154,10 +154,12 @@ table fact_purchase
 
 		annotation SummarizationSetBy = Automatic
 
-	partition fact_purchase = entity
+	partition Purchases = entity
 		mode: directLake
 		source
 			entityName: fact_purchase
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

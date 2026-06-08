@@ -1,4 +1,4 @@
-table fact_timeclock
+table Timeclock
 	lineageTag: a2b08888-8d07-44b5-a070-7dfc59317690
 	sourceLineageTag: [gold].[fact_timeclock]
 
@@ -90,10 +90,12 @@ table fact_timeclock
 
 		annotation SummarizationSetBy = Automatic
 
-	partition fact_timeclock = entity
+	partition Timeclock = entity
 		mode: directLake
 		source
 			entityName: fact_timeclock
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

@@ -1,4 +1,4 @@
-table dim_service
+table Service
 	lineageTag: f35a3fcc-d238-4d0a-8912-7521a21ec06b
 	sourceLineageTag: [gold].[dim_service]
 
@@ -40,10 +40,12 @@ table dim_service
 
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_service = entity
+	partition Service = entity
 		mode: directLake
 		source
 			entityName: dim_service
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 

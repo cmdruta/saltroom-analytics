@@ -1,4 +1,4 @@
-table dim_client
+table Client
 	lineageTag: 2ce75404-d2ce-486a-8213-3eebc885dd1b
 	sourceLineageTag: [gold].[dim_client]
 
@@ -86,10 +86,12 @@ table dim_client
 
 		annotation SummarizationSetBy = Automatic
 
-	partition dim_client = entity
+	partition Client = entity
 		mode: directLake
 		source
 			entityName: dim_client
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
+
+	changedProperty = Name
 
