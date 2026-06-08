@@ -12,6 +12,7 @@ table 'DQ Warnings'
 		sourceColumn: dq_warning_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column table_name
 		dataType: string
 		isHidden
@@ -21,6 +22,7 @@ table 'DQ Warnings'
 		sourceColumn: table_name
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_table
 		dataType: string
 		isHidden
@@ -30,6 +32,7 @@ table 'DQ Warnings'
 		sourceColumn: source_table
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_record_id
 		dataType: string
 		isHidden
@@ -39,6 +42,7 @@ table 'DQ Warnings'
 		sourceColumn: source_record_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column warning_type
 		dataType: string
 		isHidden
@@ -48,6 +52,7 @@ table 'DQ Warnings'
 		sourceColumn: warning_type
 
 		annotation SummarizationSetBy = Automatic
+
 	column warning_message
 		dataType: string
 		isHidden
@@ -57,6 +62,7 @@ table 'DQ Warnings'
 		sourceColumn: warning_message
 
 		annotation SummarizationSetBy = Automatic
+
 	column severity
 		dataType: string
 		isHidden
@@ -66,6 +72,7 @@ table 'DQ Warnings'
 		sourceColumn: severity
 
 		annotation SummarizationSetBy = Automatic
+
 	column created_at_utc
 		dataType: dateTime
 		isHidden

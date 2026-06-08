@@ -12,6 +12,7 @@ table Service
 		sourceColumn: service_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column ServiceName
 		dataType: string
 		lineageTag: e64678bb-9e7b-45e7-b5e4-04b7b9009752
@@ -19,9 +20,10 @@ table Service
 		summarizeBy: none
 		sourceColumn: service_name
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column ServiceCategory
 		dataType: string
 		lineageTag: 083fdb3e-f15e-4230-b55a-bdad832cc7f8
@@ -29,9 +31,10 @@ table Service
 		summarizeBy: none
 		sourceColumn: service_category
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column created_at_utc
 		dataType: dateTime
 		isHidden

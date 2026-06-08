@@ -12,6 +12,7 @@ table Timeclock
 		sourceColumn: work_date_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column staff_key
 		dataType: int64
 		isHidden
@@ -22,6 +23,7 @@ table Timeclock
 		sourceColumn: staff_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column hours_worked
 		dataType: double
 		lineageTag: 880b570f-21cb-43c5-a7f9-db6515c68999
@@ -32,6 +34,7 @@ table Timeclock
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column shift_count
 		dataType: int64
 		formatString: 0
@@ -41,6 +44,7 @@ table Timeclock
 		sourceColumn: shift_count
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_timeclock_record_id
 		dataType: string
 		isHidden
@@ -50,6 +54,7 @@ table Timeclock
 		sourceColumn: source_timeclock_record_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_row_hash
 		dataType: string
 		isHidden
@@ -59,6 +64,7 @@ table Timeclock
 		sourceColumn: source_row_hash
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_file_name
 		dataType: string
 		isHidden
@@ -68,6 +74,7 @@ table Timeclock
 		sourceColumn: source_file_name
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_loaded_at
 		dataType: dateTime
 		isHidden
@@ -78,6 +85,7 @@ table Timeclock
 		sourceColumn: source_loaded_at
 
 		annotation SummarizationSetBy = Automatic
+
 	column created_at_utc
 		dataType: dateTime
 		isHidden

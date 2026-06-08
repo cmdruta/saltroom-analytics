@@ -50,3 +50,7 @@ relationship 62bc200f-ee2f-f919-3fe7-ababd42da359
 	fromColumn: 'Client Retention Snapshot'.last_service_key
 	toColumn: Service.service_key
 
+relationship 9ef12655-dc3b-c108-7eed-2d9ee40edeb0
+	fromColumn: Client.registration_date_key
+	toColumn: 'Client Registration Date'.date_key
+

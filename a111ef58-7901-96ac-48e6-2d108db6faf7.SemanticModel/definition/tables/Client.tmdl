@@ -12,6 +12,7 @@ table Client
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column silver_client_key
 		dataType: string
 		isHidden
@@ -21,6 +22,7 @@ table Client
 		sourceColumn: silver_client_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_client_id
 		dataType: string
 		isHidden
@@ -30,6 +32,7 @@ table Client
 		sourceColumn: source_client_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_member_id
 		dataType: string
 		isHidden
@@ -39,6 +42,7 @@ table Client
 		sourceColumn: source_member_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column Client
 		dataType: string
 		lineageTag: e93f47d8-7ec7-4a9f-96a8-e9f535369c24
@@ -46,9 +50,10 @@ table Client
 		summarizeBy: none
 		sourceColumn: client_name
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column ClientStatus
 		dataType: string
 		lineageTag: 73198ab8-a022-49e4-a6fc-f13f2e13db93
@@ -56,9 +61,10 @@ table Client
 		summarizeBy: none
 		sourceColumn: client_status
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column RegistrationDate
 		dataType: dateTime
 		formatString: General Date
@@ -67,9 +73,10 @@ table Client
 		summarizeBy: none
 		sourceColumn: registration_date
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column Zipcode
 		dataType: string
 		lineageTag: 1d22108d-fc91-4acc-b403-4756dcf63b79
@@ -77,9 +84,10 @@ table Client
 		summarizeBy: none
 		sourceColumn: zipcode
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column created_at_utc
 		dataType: dateTime
 		isHidden
@@ -88,6 +96,16 @@ table Client
 		sourceLineageTag: created_at_utc
 		summarizeBy: none
 		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	column registration_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: e366f9b7-f2cf-4376-b0a7-3910bb829569
+		sourceLineageTag: registration_date_key
+		summarizeBy: none
+		sourceColumn: registration_date_key
 
 		annotation SummarizationSetBy = Automatic
 

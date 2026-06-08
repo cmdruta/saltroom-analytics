@@ -12,6 +12,8 @@ annotation __PBI_TimeIntelligenceEnabled = 1
 
 annotation PBI_ProTooling = ["DirectLakeOnOneLakeInWeb","WebModelingEdit"]
 
+ref table Date
+ref table _Measures
 ref table 'DQ Warnings'
 ref table Client
 ref table Purchases
@@ -20,7 +22,6 @@ ref table Visits
 ref table Service
 ref table 'Purchase Item'
 ref table 'Client Retention Snapshot'
-ref table Date
 ref table Staff
-ref table _Measures
+ref table 'Client Registration Date'
 

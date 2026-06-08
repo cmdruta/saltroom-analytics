@@ -1,34 +1,31 @@
-table Date
-	lineageTag: 52dd96f5-6f40-4f32-8f02-fc39e7a5848a
-	sourceLineageTag: [gold].[dim_date]
+table 'Client Registration Date'
+	lineageTag: 79c4562d-b6c0-4338-9aa0-e1d31c52370d
+	sourceLineageTag: [gold].[dim_client_registration_date]
 
 	column date_key
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 9d75a060-c3fa-45f1-adc4-c83cceb09eac
+		lineageTag: 128964be-2322-4faa-a598-82add44d9d90
 		sourceLineageTag: date_key
 		summarizeBy: none
 		sourceColumn: date_key
 
 		annotation SummarizationSetBy = Automatic
 
-	column CalendarDate
+	column calendar_date
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: d45e3290-7f57-4948-88b9-874794a4028b
+		lineageTag: f01fe87a-c68e-44af-b8f3-f652388684e8
 		sourceLineageTag: calendar_date
 		summarizeBy: none
 		sourceColumn: calendar_date
-
-		changedProperty = Name
 
 		annotation SummarizationSetBy = Automatic
 
 	column day
 		dataType: int64
 		formatString: 0
-		lineageTag: f1dfb78e-31e6-4a2c-8174-ec5fb33d1075
+		lineageTag: bffaadbb-1d0f-4680-84d4-e94e4624b232
 		sourceLineageTag: day
 		summarizeBy: none
 		sourceColumn: day
@@ -37,111 +34,37 @@ table Date
 
 	column day_name
 		dataType: string
-		lineageTag: 108f0b3f-1393-4352-9f4b-4bd421f2ce54
+		lineageTag: a787c288-e941-43e4-bbb0-50caaccdaa61
 		sourceLineageTag: day_name
 		summarizeBy: none
 		sourceColumn: day_name
 
 		annotation SummarizationSetBy = Automatic
 
-	column DayOfWeek
+	column day_of_week
 		dataType: int64
 		formatString: 0
-		lineageTag: bf427e5c-b107-4740-8a94-0869b566ebfe
+		lineageTag: 2e44cec3-c6f9-4264-85a3-c08381425f71
 		sourceLineageTag: day_of_week
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: day_of_week
 
-		changedProperty = Name
-
 		annotation SummarizationSetBy = Automatic
 
-	column WeekOfYear
+	column week_of_year
 		dataType: int64
 		formatString: 0
-		lineageTag: 8ad51744-3b35-48cd-bebf-43c639f057cc
+		lineageTag: 9a9ae43e-ad1d-46ee-a448-7f84f488fc41
 		sourceLineageTag: week_of_year
-		summarizeBy: sum
+		summarizeBy: none
 		sourceColumn: week_of_year
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column Month
-		dataType: int64
-		formatString: 0
-		lineageTag: dd643f79-2bad-4a30-9740-aa9e546fb93d
-		sourceLineageTag: month
-		summarizeBy: sum
-		sourceColumn: month
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column MonthName
-		dataType: string
-		lineageTag: 4e1256e9-8287-4cab-8f4a-0d10d9d05822
-		sourceLineageTag: month_name
-		summarizeBy: none
-		sourceColumn: month_name
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column Quarter
-		dataType: int64
-		formatString: 0
-		lineageTag: 7a3f5d25-881c-4d98-ad28-bdddfef18b8c
-		sourceLineageTag: quarter
-		summarizeBy: sum
-		sourceColumn: quarter
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column Year
-		dataType: int64
-		formatString: 0
-		lineageTag: a8284b96-88e2-47f7-86fd-e8d2b111bb68
-		sourceLineageTag: year
-		summarizeBy: sum
-		sourceColumn: year
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column IsWeekend
-		dataType: boolean
-		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: 2c5e6296-2a3d-4654-921e-92279ef1b9ba
-		sourceLineageTag: is_weekend
-		summarizeBy: none
-		sourceColumn: is_weekend
-
-		changedProperty = Name
-
-		annotation SummarizationSetBy = Automatic
-
-	column created_at_utc
-		dataType: dateTime
-		isHidden
-		formatString: General Date
-		lineageTag: 307a41de-59ca-42c1-8b80-a48e467480fa
-		sourceLineageTag: created_at_utc
-		summarizeBy: none
-		sourceColumn: created_at_utc
 
 		annotation SummarizationSetBy = Automatic
 
 	column week_start_date
 		dataType: dateTime
 		formatString: General Date
-		lineageTag: 2c3d8fdc-d1a5-4fe5-bd2b-5f68ca524aea
+		lineageTag: c523216f-c756-49ec-b422-a870abd9a08b
 		sourceLineageTag: week_start_date
 		summarizeBy: none
 		sourceColumn: week_start_date
@@ -150,17 +73,76 @@ table Date
 
 	column week_of_year_label
 		dataType: string
-		lineageTag: bb9e3c0a-e9d3-4bcb-a5a0-def619816b77
+		lineageTag: 08fe001a-c358-480d-96e9-f351a76d02be
 		sourceLineageTag: week_of_year_label
 		summarizeBy: none
 		sourceColumn: week_of_year_label
 
 		annotation SummarizationSetBy = Automatic
 
-	partition Date = entity
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 5beeffa8-3f03-406c-ae9a-c3b1a8c5aa17
+		sourceLineageTag: month
+		summarizeBy: none
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: 41beee7e-104b-4145-b1df-4257451991c2
+		sourceLineageTag: month_name
+		summarizeBy: none
+		sourceColumn: month_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 4fb61828-b693-43fa-8f10-d70e07bdd9b2
+		sourceLineageTag: quarter
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 1de2a4f6-9e92-47df-a41c-7225b433d779
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a0a98119-df5f-47cc-904a-82c62e91e331
+		sourceLineageTag: is_weekend
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	column created_at_utc
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: c5c98c2b-f374-470d-9a1a-3946f1d591f8
+		sourceLineageTag: created_at_utc
+		summarizeBy: none
+		sourceColumn: created_at_utc
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Client Registration Date' = entity
 		mode: directLake
 		source
-			entityName: dim_date
+			entityName: dim_client_registration_date
 			schemaName: gold
 			expressionSource: 'DirectLake - saltroom_lakehouse'
 

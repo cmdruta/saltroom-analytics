@@ -12,6 +12,7 @@ table Purchases
 		sourceColumn: purchase_date_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column client_key
 		dataType: int64
 		isHidden
@@ -22,6 +23,7 @@ table Purchases
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column purchase_item_key
 		dataType: int64
 		isHidden
@@ -32,6 +34,7 @@ table Purchases
 		sourceColumn: purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column sold_by_staff_key
 		dataType: int64
 		isHidden
@@ -42,6 +45,7 @@ table Purchases
 		sourceColumn: sold_by_staff_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_purchase_item_id
 		dataType: string
 		isHidden
@@ -51,6 +55,7 @@ table Purchases
 		sourceColumn: source_purchase_item_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column gross_amount
 		dataType: double
 		lineageTag: b2e646a3-223b-49e3-9517-c8c96af11414
@@ -61,6 +66,7 @@ table Purchases
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column discount_amount
 		dataType: double
 		lineageTag: 6863169b-2df1-4744-be0a-db302119938a
@@ -71,6 +77,7 @@ table Purchases
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column net_sales_amount
 		dataType: double
 		lineageTag: b4155410-100c-427b-a86e-23652829fc1d
@@ -81,6 +88,7 @@ table Purchases
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column tax_amount
 		dataType: double
 		lineageTag: a404f570-3a9b-48e2-9d6e-f4ec03b3046f
@@ -91,6 +99,7 @@ table Purchases
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column total_paid_amount
 		dataType: double
 		lineageTag: ad4bc462-3e2b-433f-942a-b7216a691076
@@ -101,6 +110,7 @@ table Purchases
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column quantity
 		dataType: int64
 		formatString: 0
@@ -110,6 +120,7 @@ table Purchases
 		sourceColumn: quantity
 
 		annotation SummarizationSetBy = Automatic
+
 	column DiscountCode
 		dataType: string
 		lineageTag: ce52a34a-1ce3-43af-ae16-2f7cf15dbe98
@@ -117,9 +128,10 @@ table Purchases
 		summarizeBy: none
 		sourceColumn: discount_code
 
-
 		changedProperty = Name
+
 		annotation SummarizationSetBy = Automatic
+
 	column source_file_name
 		dataType: string
 		isHidden
@@ -129,6 +141,7 @@ table Purchases
 		sourceColumn: source_file_name
 
 		annotation SummarizationSetBy = Automatic
+
 	column source_loaded_at
 		dataType: dateTime
 		isHidden
@@ -139,6 +152,7 @@ table Purchases
 		sourceColumn: source_loaded_at
 
 		annotation SummarizationSetBy = Automatic
+
 	column created_at_utc
 		dataType: dateTime
 		isHidden

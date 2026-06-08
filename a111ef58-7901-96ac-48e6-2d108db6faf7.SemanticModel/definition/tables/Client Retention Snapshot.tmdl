@@ -11,6 +11,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: snapshot_date
 
 		annotation SummarizationSetBy = Automatic
+
 	column batch_id
 		dataType: string
 		isHidden
@@ -20,6 +21,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: batch_id
 
 		annotation SummarizationSetBy = Automatic
+
 	column client_key
 		dataType: int64
 		isHidden
@@ -30,6 +32,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: client_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column client_name
 		dataType: string
 		isHidden
@@ -39,6 +42,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: client_name
 
 		annotation SummarizationSetBy = Automatic
+
 	column last_visit_date
 		dataType: dateTime
 		formatString: General Date
@@ -48,6 +52,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_visit_date
 
 		annotation SummarizationSetBy = Automatic
+
 	column days_since_last_visit
 		dataType: int64
 		formatString: 0
@@ -57,6 +62,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: days_since_last_visit
 
 		annotation SummarizationSetBy = Automatic
+
 	column lifetime_visits
 		dataType: int64
 		formatString: 0
@@ -66,6 +72,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: lifetime_visits
 
 		annotation SummarizationSetBy = Automatic
+
 	column visits_last_30_days
 		dataType: int64
 		formatString: 0
@@ -75,6 +82,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: visits_last_30_days
 
 		annotation SummarizationSetBy = Automatic
+
 	column visits_last_60_days
 		dataType: int64
 		formatString: 0
@@ -84,6 +92,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: visits_last_60_days
 
 		annotation SummarizationSetBy = Automatic
+
 	column visits_last_90_days
 		dataType: int64
 		formatString: 0
@@ -93,6 +102,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: visits_last_90_days
 
 		annotation SummarizationSetBy = Automatic
+
 	column lifetime_revenue
 		dataType: double
 		lineageTag: 3240e403-2c69-4e8d-b73c-b0dd18312f13
@@ -103,6 +113,7 @@ table 'Client Retention Snapshot'
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column revenue_last_90_days
 		dataType: double
 		lineageTag: 37c8ae47-4bf2-4166-8281-770cce5bcc2c
@@ -113,6 +124,7 @@ table 'Client Retention Snapshot'
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column last_service_key
 		dataType: int64
 		isHidden
@@ -123,6 +135,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_service_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column last_service_name
 		dataType: string
 		isHidden
@@ -132,6 +145,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_service_name
 
 		annotation SummarizationSetBy = Automatic
+
 	column last_purchase_item_key
 		dataType: int64
 		isHidden
@@ -142,6 +156,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_purchase_item_key
 
 		annotation SummarizationSetBy = Automatic
+
 	column last_purchase_item_name
 		dataType: string
 		isHidden
@@ -151,6 +166,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_purchase_item_name
 
 		annotation SummarizationSetBy = Automatic
+
 	column last_discount_code
 		dataType: string
 		lineageTag: 4532db8e-495c-4a83-8731-59c49c5dcf7f
@@ -159,6 +175,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: last_discount_code
 
 		annotation SummarizationSetBy = Automatic
+
 	column retention_status
 		dataType: string
 		lineageTag: 36674698-63a5-4442-ae6e-f106054fded1
@@ -167,6 +184,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: retention_status
 
 		annotation SummarizationSetBy = Automatic
+
 	column retention_priority
 		dataType: string
 		lineageTag: 23c6b142-137c-4276-b113-455155d53f7b
@@ -175,6 +193,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: retention_priority
 
 		annotation SummarizationSetBy = Automatic
+
 	column recommended_action
 		dataType: string
 		lineageTag: 7b4d65dd-06c8-4c3e-bc29-5bb9097682fa
@@ -183,6 +202,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: recommended_action
 
 		annotation SummarizationSetBy = Automatic
+
 	column created_at_utc
 		dataType: dateTime
 		isHidden
@@ -193,6 +213,7 @@ table 'Client Retention Snapshot'
 		sourceColumn: created_at_utc
 
 		annotation SummarizationSetBy = Automatic
+
 	column updated_at_utc
 		dataType: dateTime
 		isHidden
